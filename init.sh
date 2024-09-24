@@ -50,8 +50,8 @@ info "시스템 전체의 파일 디스크립터 제한 설정 중..."
 if grep -q "nofile" /etc/security/limits.conf; then
     sed -i '/nofile/d' /etc/security/limits.conf
 fi
-info "*       soft    nofile  65535" >> /etc/security/limits.conf
-info "*       hard    nofile  65535" >> /etc/security/limits.conf
+echo "*       soft    nofile  65535" >> /etc/security/limits.conf
+echo "*       hard    nofile  65535" >> /etc/security/limits.conf
 info "완료: /etc/security/limits.conf 파일이 수정되었습니다."
 
 # /etc/sysctl.conf 파일 수정
