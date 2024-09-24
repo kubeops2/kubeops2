@@ -63,8 +63,8 @@ if grep -q "fs.inotify.max_user_instances" /etc/sysctl.conf; then
     sed -i '/fs.inotify.max_user_instances/d' /etc/sysctl.conf
 fi
 
-info "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf
-info "fs.inotify.max_user_instances=512" >> /etc/sysctl.conf
+echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf
+echo "fs.inotify.max_user_instances=512" >> /etc/sysctl.conf
 info "완료: /etc/sysctl.conf 파일이 수정되었습니다."
 
 sysctl -p
