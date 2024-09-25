@@ -114,7 +114,7 @@ snap install helm --classic
 echo;echo
 info "::: Setting User ${RKE2_ADMIN} Environment..."
 sleep 1
-mkdir -p ~/.kube
+mkdir -p ~${RKE2_ADMIN}/.kube
 cp /etc/rancher/rke2/rke2.yaml ~${RKE2_ADMIN}/.kube/config
 chown -R ${RKE2_ADMIN}:${RKE2_ADMIN} ~/.kube
 chmod 600 /home/${RKE2_ADMIN}/.kube/config
