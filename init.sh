@@ -44,11 +44,16 @@ sleep 1
 echo;echo
 
 # Check variables
-# INSTALL_RKE2_VERSION 과 INSTALL_RKE2_TYPE 을 체크한다.
-RKE2_VERSION=v1.30.5-rc3+rke2r1
-RKE2_TYPE=server
-RKE2_ADMIN=kubeops
-
+# INSTALL_RKE2_VERSION 과 INSTALL_RKE2_TYPE 그리고 admin 계정을 체크한다.
+if [ -z ${RKE2_VERSION} ]; then
+    RKE2_VERSION=v1.30.5-rc3+rke2r1
+fi
+if [ -z ${RKE2_TYPE} ]; then
+    RKE2_TYPE=server
+fi
+if [ -z ${RKE2_ADMIN} ]; then
+    RKE2_ADMIN=kubeops
+fi
 
 # /etc/security/limits.conf 파일 수정
 info "::: 시스템 전체의 파일 디스크립터 제한 설정 중..."
@@ -121,10 +126,11 @@ chmod 600 /home/${RKE2_ADMIN}/.kube/config
 echo "KUBECONFIG=/home/${RKE2_ADMIN}/.kube/config" >> /home/${RKE2_ADMIN}/.bashrc
 echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> /home/${RKE2_ADMIN}/.bashrc
 source /home/${RKE2_ADMIN}/.bashrc
-kubectl get nodes
 
 echo;echo
 info "::: Finish ${RKE2_ADMIN} Environment..."
+info "::: Running the below command for testing!!!"
+info "::: source .bashrc && kubectl get nodes"
 sleep 1
 
 
@@ -134,9 +140,3 @@ sleep 1
 # curl -sS https://webi.sh/k9s | sh
 # source /home/${RKE2_ADMIN}/.config/envman/PATH.env
 # echo "source <(kubectl completion bash)" >> /home/${RKE2_ADMIN}/.bashrc
-
-# Test
-echo;echo
-info "::: Running the below command for testing!!!"
-info "::: kubectl get nodes"
-sleep 1
