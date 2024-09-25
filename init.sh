@@ -87,7 +87,7 @@ info "Install RKE2 with ${RKE2_VERSION} and ${RKE2_TYPE} mode ..."
 curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${RKE2_VERSION} INSTSLL_RKE2_TYPE=${RKE2_TYPE} sh -
 systemctl enable rke2-server.service
 systemctl start rke2-server.service
-journalctl -u rke2-server -f
+# journalctl -u rke2-server -f
 info "Done!! -- Installing RKE2 with ${RKE2_VERSION} and ${RKE2_TYPE} mode ..."
 
 # install helm
@@ -99,9 +99,10 @@ mkdir -p ~/.kube
 cp /etc/rancher/rke2/rke2.yaml ~/.kube/config
 chown -R $USER:$USER ~/.kube
 chmod 600 /home/$USER/.kube/config
-KUBECONFIG=~/.kube/config
+export KUBECONFIG=~/.kube/config
 PATH=$PATH:/var/lib/rancher/rke2/bin
 echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> ~/.bashrc
+export PATH=$PATH:/var/lib/rancher/rke2/bin
 
 info "Testing kubectl for getting nodes..."
 kubectl get nodes
@@ -111,7 +112,3 @@ curl -sS https://webi.sh/k9s | sh
 source ~/.config/envman/PATH.env
 echo "source <(kubectl completion bash)" >> ~/.bashrc
 
-# Reboot
-info "Recommend rebooting the system..."
-sleep 5
-sudo reboot
