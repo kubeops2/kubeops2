@@ -46,7 +46,8 @@ echo;echo
 # Check variables
 # INSTALL_RKE2_VERSION 과 INSTALL_RKE2_TYPE 을 체크한다.
 RKE2_VERSION=v1.30.5-rc3+rke2r1
-RKE2_TYPE='server'
+RKE2_TYPE=server
+RKE2_ADMIN=kubeops
 
 
 # /etc/security/limits.conf 파일 수정
@@ -80,25 +81,28 @@ sed -i 's/\/swap/#swap/g' /etc/fstab
 swapoff -a
 
 # Install Tools
-info "::: Installing kubectl, helm, yq and jq ..."
+info "::: Installing yq and jq ..."
 apt update
 apt install iptables -y
 snap install yq jq
 # apt update
 
 # Install RKE2 As a server
+echo;echo
 info "::: Install RKE2 with ${RKE2_VERSION} and ${RKE2_TYPE} mode ..."
 sleep 1
 
-echo;echo
 
 curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${RKE2_VERSION} INSTSLL_RKE2_TYPE=${RKE2_TYPE} sh -
 
+echo;echo
 info "::: Enabling and Starting RKE2-Server service ..."
 sleep 1
 systemctl enable rke2-server.service
 systemctl start rke2-server.service
 # journalctl -u rke2-server -f
+
+echo;echo
 info "::: Done!!! - Enabling and Starting RKE2-Server service ... "
 sleep 1
 
@@ -107,26 +111,32 @@ info "::: Install Helm..."
 snap install helm --classic
 
 # Setting up User Environment
-info "::: Setting User ${USER} Environment..."
+echo;echo
+info "::: Setting User ${RKE2_ADMIN} Environment..."
 sleep 1
 mkdir -p ~/.kube
-cp /etc/rancher/rke2/rke2.yaml ~/.kube/config
-chown -R $USER:$USER ~/.kube
-chmod 600 /home/$USER/.kube/config
-export KUBECONFIG=~/.kube/config
+cp /etc/rancher/rke2/rke2.yaml ~${RKE2_ADMIN}/.kube/config
+chown -R ${RKE2_ADMIN}:${RKE2_ADMIN} ~/.kube
+chmod 600 /home/${RKE2_ADMIN}/.kube/config
+export KUBECONFIG=~${RKE2_ADMIN}/.kube/config
 PATH=$PATH:/var/lib/rancher/rke2/bin
-echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> ~/.bashrc
+echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> ~${RKE2_ADMIN}/.bashrc
 export PATH=$PATH:/var/lib/rancher/rke2/bin
 
-info "::: Testing kubectl for getting nodes..."
-kubectl get nodes
+echo;echo
+info "::: Finish ${RKE2_ADMIN} Environment..."
 sleep 1
 
-echo;echo
-# Setting up k9s
 
+# Setting up k9s
+echo;echo
 info "::: Install k9s tool..."
 curl -sS https://webi.sh/k9s | sh
-source ~/.config/envman/PATH.env
-echo "source <(kubectl completion bash)" >> ~/.bashrc
+source ~${RKE2_ADMIN}/.config/envman/PATH.env
+echo "source <(kubectl completion bash)" >> ~${RKE2_ADMIN}/.bashrc
 
+# Test
+echo;echo
+info "::: Running the below command for testing!!!"
+info "::: kubectl get nodes"
+sleep 1
