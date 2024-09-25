@@ -38,7 +38,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 info "::: sudo 로 실행 가능 합니다."
-sleep(1)
+sleep 1
 
 # line breaker
 echo;echo
@@ -88,19 +88,19 @@ snap install yq jq
 
 # Install RKE2 As a server
 info "::: Install RKE2 with ${RKE2_VERSION} and ${RKE2_TYPE} mode ..."
-sleep(1)
+sleep 1
 
 echo;echo
 
 curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${RKE2_VERSION} INSTSLL_RKE2_TYPE=${RKE2_TYPE} sh -
 
 info "::: Enabling and Starting RKE2-Server service ..."
-sleep(1)
+sleep 1
 systemctl enable rke2-server.service
 systemctl start rke2-server.service
 # journalctl -u rke2-server -f
 info "::: Done!!! - Enabling and Starting RKE2-Server service ... "
-sleep(1)
+sleep 1
 
 # install helm
 info "::: Install Helm..."
@@ -108,7 +108,7 @@ snap install helm --classic
 
 # Setting up User Environment
 info "::: Setting User ${USER} Environment..."
-sleep(1)
+sleep 1
 mkdir -p ~/.kube
 cp /etc/rancher/rke2/rke2.yaml ~/.kube/config
 chown -R $USER:$USER ~/.kube
@@ -120,7 +120,7 @@ export PATH=$PATH:/var/lib/rancher/rke2/bin
 
 info "::: Testing kubectl for getting nodes..."
 kubectl get nodes
-sleep(1)
+sleep 1
 
 echo;echo
 # Setting up k9s
