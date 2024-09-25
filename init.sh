@@ -77,9 +77,8 @@ swapoff -a
 
 # Install Tools
 info "Installing kubectl, helm, yq and jq ..."
-snap install helm --classic
 snap install yq jq
-apt update
+# apt update
 
 # Install RKE2 As a server
 info "Install RKE2 with ${RKE2_VERSION} and ${RKE2_TYPE} mode ..."
@@ -88,6 +87,9 @@ systemctl enable rke2-server.service
 systemctl start rke2-server.service
 journalctl -u rke2-server -f
 info "Done!! -- Installing RKE2 with ${RKE2_VERSION} and ${RKE2_TYPE} mode ..."
+
+# install helm
+snap install helm --classic
 
 # Setting up User Environment
 info "Setting User ${USER} Environment..."
