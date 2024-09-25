@@ -77,6 +77,8 @@ swapoff -a
 
 # Install Tools
 info "Installing kubectl, helm, yq and jq ..."
+apt update
+apt install iptables -y
 snap install yq jq
 # apt update
 
