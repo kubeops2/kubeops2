@@ -114,26 +114,26 @@ snap install helm --classic
 echo;echo
 info "::: Setting User ${RKE2_ADMIN} Environment..."
 sleep 1
-mkdir -p ~${RKE2_ADMIN}/.kube
-cp /etc/rancher/rke2/rke2.yaml ~${RKE2_ADMIN}/.kube/config
-chown -R ${RKE2_ADMIN}:${RKE2_ADMIN} ~/.kube
+mkdir -p /home/${RKE2_ADMIN}/.kube
+cp /etc/rancher/rke2/rke2.yaml /home/${RKE2_ADMIN}/.kube/config
+chown -R ${RKE2_ADMIN}:${RKE2_ADMIN} /home/${RKE2_ADMIN}/.kube
 chmod 600 /home/${RKE2_ADMIN}/.kube/config
-export KUBECONFIG=~${RKE2_ADMIN}/.kube/config
-PATH=$PATH:/var/lib/rancher/rke2/bin
-echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> ~${RKE2_ADMIN}/.bashrc
-export PATH=$PATH:/var/lib/rancher/rke2/bin
+echo "KUBECONFIG=/home/${RKE2_ADMIN}/.kube/config" >> /home/${RKE2_ADMIN}/.bashrc
+echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> /home/${RKE2_ADMIN}/.bashrc
+source /home/${RKE2_ADMIN}/.bashrc
+kubectl get nodes
 
 echo;echo
 info "::: Finish ${RKE2_ADMIN} Environment..."
 sleep 1
 
 
-# Setting up k9s
-echo;echo
-info "::: Install k9s tool..."
-curl -sS https://webi.sh/k9s | sh
-source ~${RKE2_ADMIN}/.config/envman/PATH.env
-echo "source <(kubectl completion bash)" >> ~${RKE2_ADMIN}/.bashrc
+# # Setting up k9s
+# echo;echo
+# info "::: Install k9s tool..."
+# curl -sS https://webi.sh/k9s | sh
+# source /home/${RKE2_ADMIN}/.config/envman/PATH.env
+# echo "source <(kubectl completion bash)" >> /home/${RKE2_ADMIN}/.bashrc
 
 # Test
 echo;echo
