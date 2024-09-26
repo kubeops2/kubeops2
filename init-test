@@ -15,14 +15,35 @@ double_line() {
     echo;echo
 }
 
+# info logs the given argument at info log level.
+info() {
+    echo "[INFO] " "$@"
+}
+
+# warn logs the given argument at warn log level.
+warn() {
+    echo "[WARN] " "$@" >&2
+}
+
+# fatal logs the given argument at fatal log level.
+fatal() {
+    echo "[ERROR] " "$@" >&2
+    if [ -n "${SUFFIX}" ]; then
+        echo "[ALT] Please visit 'https://github.com/rancher/rke2/releases' directly and download the latest rke2.${SUFFIX}.tar.gz" >&2
+    fi
+    exit 1
+}
+
 # RKE2 agent config
 agent_config() {
-    echo "Applying Agent Config..."
+    double_line
+    info "::: Applying Agent Config..."
 }
 
 # RKE2 server config
 server_config() {
-    echo "server config"
+    double_line
+    info "::: Applying Server config"
 }
 
 # usage
@@ -66,7 +87,7 @@ usage() {
             * default : server
 
         - RKE2_ADMIN
-            Install RKE2 and then Configure kubeconfig on this account name.
+            Install RKE2 and then Configure kubeconfig on this account.
             This account should be exist already with sudo permission.
             * default : kubeops
 
@@ -83,25 +104,6 @@ usage() {
             As Root, 
             curl <this script URL> | RKE2_RUN=true ENV_VAR=... ENV_VAR2=... bash
 "
-}
-
-# info logs the given argument at info log level.
-info() {
-    echo "[INFO] " "$@"
-}
-
-# warn logs the given argument at warn log level.
-warn() {
-    echo "[WARN] " "$@" >&2
-}
-
-# fatal logs the given argument at fatal log level.
-fatal() {
-    echo "[ERROR] " "$@" >&2
-    if [ -n "${SUFFIX}" ]; then
-        echo "[ALT] Please visit 'https://github.com/rancher/rke2/releases' directly and download the latest rke2.${SUFFIX}.tar.gz" >&2
-    fi
-    exit 1
 }
 
 # 루트 권한 확인
@@ -187,11 +189,9 @@ systemctl enable rke2-server.service
 
 # Configure Cluster
 if [ "${RKE2_TYPE}" = 'server' ]; then
-    double_line
     info "::: Configuring RKE2 Server config.yaml ..."
     server_config
 elif [ "${RKE2_TYPE}" = 'agent' ]; then
-    double_line
     info "::: Configuring RKE2 Agent config.yaml ..."
     agent_config
 fi
