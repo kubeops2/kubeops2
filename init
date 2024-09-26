@@ -92,7 +92,7 @@ if [ "$EUID" -ne 0 ]
   exit -1
 fi
 
-info "::: sudo 로 실행 가능 합니다."
+info "::: sudo 권한 확인"
 sleep 1
 
 # Installation processs true or false
@@ -157,7 +157,6 @@ snap install yq jq
 echo;echo
 info "::: Install RKE2 with ${RKE2_VERSION} and ${RKE2_TYPE} mode ..."
 sleep 1
-
 
 curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${RKE2_VERSION} INSTSLL_RKE2_TYPE=${RKE2_TYPE} sh -
 
