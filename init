@@ -6,9 +6,65 @@ if [ "${DEBUG}" = 1 ]; then
     set -x
 fi
 
-# Usage:
-#   curl ... | ENV_VAR=... sh -
-#
+# usage
+show_env() {
+    if [ -n "${RKE2_ADMIN}" ]; then
+        echo "${RKE2_ADMIN}"
+    fi
+    if [ -n "${RKE2_TYPE}" ]; then
+        echo "${RKE2_TYPE}"
+    fi
+    if [ -n "${RKE2_VERSION}" ]; then
+        echo "${RKE2_VERSION}"
+    fi
+    if [ -n "${RKE2_RUN}" ]; then
+        echo "${RKE2_RUN}"
+    fi
+}
+
+usage() {
+    echo " 
+    This is CURLED Script to Install RKE2 along with Ecosystem provided by OpsNow KubeOps Team.
+    This Tool is the First part and It is the script For only Installing RKE2 
+    And Configuring ADMIN user's kubeconfig Environment.
+
+    Steps.
+        1. Install RKE2 and kubeconfig Env.
+            $ curl {URL/init} | sudo RKE2_RUN=true ENV_VAR=... ENV_VAR2=... bash
+
+        2. Install Ecosystems on RKE2
+            $ curl {URL/tools} | TOOL_VAR=... TOOL_VAR2=... bash
+
+
+    ENV_VAR:
+        - RKE2_VERSION
+            Install RKE2 with this version.
+            * default : v1.30.5-rc3+rke2r1
+
+        - RKE2_TYPE
+            Install RKE2 with this mode.
+            * value : [server | agent]
+            * default : server
+
+        - RKE2_ADMIN
+            Install RKE2 and then Configure kubeconfig on this account name.
+            This account should be exist already with sudo permission.
+            * default : kubeops
+
+        - RKE2_RUN
+            Install RKE2 if this value is 'true'.
+            default : falase
+
+
+    Usage: 
+            curl <this script URL> | sudo RKE2_RUN=true ENV_VAR=... ENV_VAR2=... bash
+
+                OR
+
+            As Root, 
+            curl <this script URL> | RKE2_RUN=true ENV_VAR=... ENV_VAR2=... bash
+"
+}
 
 # info logs the given argument at info log level.
 info() {
@@ -29,7 +85,6 @@ fatal() {
     exit 1
 }
 
-
 # 루트 권한 확인
 if [ "$EUID" -ne 0 ]
   then info "::: 이 스크립트는 sudo 권한으로 실행해야 합니다."
@@ -40,18 +95,24 @@ fi
 info "::: sudo 로 실행 가능 합니다."
 sleep 1
 
+# Installation processs true or false
+if [ -z "${RKE2_RUN}" ]; then # || [ "${RKE2_RUN}" = false ]; then
+    usage
+    exit -1
+fi
+
 # line breaker
 echo;echo
 
 # Check variables
 # INSTALL_RKE2_VERSION 과 INSTALL_RKE2_TYPE 그리고 admin 계정을 체크한다.
-if [ -z ${RKE2_VERSION} ]; then
+if [ -z "${RKE2_VERSION}" ]; then
     RKE2_VERSION=v1.30.5-rc3+rke2r1
 fi
-if [ -z ${RKE2_TYPE} ]; then
+if [ -z "${RKE2_TYPE}" ]; then
     RKE2_TYPE=server
 fi
-if [ -z ${RKE2_ADMIN} ]; then
+if [ -z "${RKE2_ADMIN}" ]; then
     RKE2_ADMIN=kubeops
 fi
 

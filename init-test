@@ -108,13 +108,13 @@ echo;echo
 
 # Check variables
 # INSTALL_RKE2_VERSION 과 INSTALL_RKE2_TYPE 그리고 admin 계정을 체크한다.
-if [ -z ${RKE2_VERSION} ]; then
+if [ -z "${RKE2_VERSION}" ]; then
     RKE2_VERSION=v1.30.5-rc3+rke2r1
 fi
-if [ -z ${RKE2_TYPE} ]; then
+if [ -z "${RKE2_TYPE}" ]; then
     RKE2_TYPE=server
 fi
-if [ -z ${RKE2_ADMIN} ]; then
+if [ -z "${RKE2_ADMIN}" ]; then
     RKE2_ADMIN=kubeops
 fi
 
