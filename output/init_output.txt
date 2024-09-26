@@ -1,0 +1,65 @@
+sudo rebootkubeops@rke201:~$ curl -sSL https://raw.githubusercontent.com/kubeops2/kubeops2/refs/heads/main/init.sh | sudo bash -
+[sudo] password for kubeops:
+[INFO]  sudo 로 실행 가능 합니다.
+[INFO]  시스템 전체의 파일 디스크립터 제한 설정 중...
+[INFO]  완료: /etc/security/limits.conf 파일이 수정되었습니다.
+[INFO]  Applying Kernel Parameters...
+[INFO]  완료: /etc/sysctl.conf 파일이 수정되었습니다.
+fs.inotify.max_user_watches = 524288
+fs.inotify.max_user_instances = 512
+[INFO]  Deactivating Swap space...
+[INFO]  Installing kubectl, helm, yq and jq ...
+2024-09-25T02:58:15Z INFO Waiting for automatic snapd restart...
+jq 1.5+dfsg-1 from Michael Vogt (mvo✪) installed
+yq v4.44.2 from Mike Farah (mikefarah) installed
+[INFO]  Install RKE2 with v1.30.5-rc3+rke2r1 and server mode ...
+[INFO]  using v1.30.5-rc3+rke2r1 as release
+[INFO]  downloading checksums at https://github.com/rancher/rke2/releases/download/v1.30.5-rc3+rke2r1/sha256sum-amd64.txt
+[INFO]  downloading tarball at https://github.com/rancher/rke2/releases/download/v1.30.5-rc3+rke2r1/rke2.linux-amd64.tar.gz
+[INFO]  verifying tarball
+[INFO]  unpacking tarball file to /usr/local
+Created symlink /etc/systemd/system/multi-user.target.wants/rke2-server.service → /usr/local/lib/systemd/system/rke2-server.service.
+Sep 25 02:59:39 rke201 rke2[1621]: time="2024-09-25T02:59:39Z" level=info msg="Applying CRD helmcharts.helm.cattle.io"
+Sep 25 02:59:39 rke201 rke2[1621]: time="2024-09-25T02:59:39Z" level=info msg="Applying CRD helmchartconfigs.helm.cattle.io"
+Sep 25 02:59:42 rke201 rke2[1621]: time="2024-09-25T02:59:42Z" level=info msg="Cluster Role Bindings applied successfully"
+Sep 25 02:59:42 rke201 rke2[1621]: time="2024-09-25T02:59:42Z" level=info msg="Reconciling ETCDSnapshotFile resources"
+Sep 25 02:59:42 rke201 rke2[1621]: time="2024-09-25T02:59:42Z" level=info msg="ETCD server is now running"
+Sep 25 02:59:42 rke201 rke2[1621]: time="2024-09-25T02:59:42Z" level=info msg="rke2 is up and running"
+Sep 25 02:59:42 rke201 rke2[1621]: time="2024-09-25T02:59:42Z" level=info msg="Starting dynamiclistener CN filter node controller"
+Sep 25 02:59:42 rke201 rke2[1621]: time="2024-09-25T02:59:42Z" level=info msg="Starting managed etcd node metadata controller"
+Sep 25 02:59:42 rke201 rke2[1621]: time="2024-09-25T02:59:42Z" level=info msg="Tunnel server egress proxy mode: agent"
+Sep 25 02:59:42 rke201 systemd[1]: Started Rancher Kubernetes Engine v2 (server).
+Sep 25 02:59:42 rke201 rke2[1621]: time="2024-09-25T02:59:42Z" level=info msg="Reconciliation of ETCDSnapshotFile resources complete"
+Sep 25 02:59:42 rke201 rke2[1621]: time="2024-09-25T02:59:42Z" level=info msg="Starting k3s.cattle.io/v1, Kind=Addon controller"
+Sep 25 02:59:42 rke201 rke2[1621]: time="2024-09-25T02:59:42Z" level=info msg="Creating deploy event broadcaster"
+Sep 25 02:59:42 rke201 rke2[1621]: time="2024-09-25T02:59:42Z" level=info msg="Starting /v1, Kind=Node controller"
+Sep 25 02:59:42 rke201 rke2[1621]: time="2024-09-25T02:59:42Z" level=info msg="Creating helm-controller event broadcaster"
+Sep 25 02:59:43 rke201 rke2[1621]: time="2024-09-25T02:59:43Z" level=info msg="Cluster dns configmap has been set successfully"
+Sep 25 02:59:43 rke201 rke2[1621]: time="2024-09-25T02:59:43Z" level=info msg="Starting managed etcd apiserver addresses controller"
+Sep 25 02:59:43 rke201 rke2[1621]: time="2024-09-25T02:59:43Z" level=info msg="Starting managed etcd member removal controller"
+Sep 25 02:59:43 rke201 rke2[1621]: time="2024-09-25T02:59:43Z" level=info msg="Starting managed etcd snapshot ConfigMap controller"
+Sep 25 02:59:43 rke201 rke2[1621]: time="2024-09-25T02:59:43Z" level=info msg="Starting k3s.cattle.io/v1, Kind=ETCDSnapshotFile controller"
+Sep 25 02:59:43 rke201 rke2[1621]: time="2024-09-25T02:59:43Z" level=info msg="Stopped tunnel to 127.0.0.1:9345"
+Sep 25 02:59:43 rke201 rke2[1621]: time="2024-09-25T02:59:43Z" level=info msg="Connecting to proxy" url="wss://10.251.232.62:9345/v1-rke2/connect"
+Sep 25 02:59:43 rke201 rke2[1621]: time="2024-09-25T02:59:43Z" level=info msg="Proxy done" err="context canceled" url="wss://127.0.0.1:9345/v1-rke2/connect"
+Sep 25 02:59:43 rke201 rke2[1621]: time="2024-09-25T02:59:43Z" level=info msg="error in remotedialer server [400]: websocket: close 1006 (abnormal closure): unexpected EOF"
+Sep 25 02:59:43 rke201 rke2[1621]: time="2024-09-25T02:59:43Z" level=info msg="Handling backend connection request [rke201]"
+Sep 25 02:59:43 rke201 rke2[1621]: time="2024-09-25T02:59:43Z" level=info msg="Remotedialer connected to proxy" url="wss://10.251.232.62:9345/v1-rke2/connect"
+Sep 25 02:59:44 rke201 rke2[1621]: time="2024-09-25T02:59:44Z" level=info msg="Starting /v1, Kind=ConfigMap controller"
+Sep 25 02:59:44 rke201 rke2[1621]: time="2024-09-25T02:59:44Z" level=info msg="Starting /v1, Kind=ServiceAccount controller"
+Sep 25 02:59:44 rke201 rke2[1621]: time="2024-09-25T02:59:44Z" level=info msg="Starting /v1, Kind=Secret controller"
+Sep 25 02:59:44 rke201 rke2[1621]: time="2024-09-25T02:59:44Z" level=info msg="Starting helm.cattle.io/v1, Kind=HelmChart controller"
+Sep 25 02:59:44 rke201 rke2[1621]: time="2024-09-25T02:59:44Z" level=info msg="Starting helm.cattle.io/v1, Kind=HelmChartConfig controller"
+Sep 25 02:59:44 rke201 rke2[1621]: time="2024-09-25T02:59:44Z" level=info msg="Starting rbac.authorization.k8s.io/v1, Kind=ClusterRoleBinding controller"
+Sep 25 02:59:44 rke201 rke2[1621]: time="2024-09-25T02:59:44Z" level=info msg="Starting batch/v1, Kind=Job controller"
+Sep 25 02:59:44 rke201 rke2[1621]: time="2024-09-25T02:59:44Z" level=info msg="Reconciling snapshot ConfigMap data"
+Sep 25 02:59:45 rke201 rke2[1621]: time="2024-09-25T02:59:45Z" level=info msg="Updating TLS secret for kube-system/rke2-serving (count: 10): map[listener.cattle.io/cn-10.251.232.62:10.251.232.62 listener.cattle.io/cn-10.43.0.1:10.43.0.1 listener.cattle.io/cn-127.0.0.1:127.0.0.1 listener.cattle.io/cn-__1-f16284:::1 listener.cattle.io/cn-kubernetes:kubernetes listener.cattle.io/cn-kubernetes.default:kubernetes.default listener.cattle.io/cn-kubernetes.default.svc:kubernetes.default.svc listener.cattle.io/cn-kubernetes.default.svc.cluster.local:kubernetes.default.svc.cluster.local listener.cattle.io/cn-localhost:localhost listener.cattle.io/cn-rke201:rke201 listener.cattle.io/fingerprint:SHA1=0674126B207BDFF8B8AB8A211E01960EB7126904]"
+Sep 25 02:59:45 rke201 rke2[1621]: time="2024-09-25T02:59:45Z" level=info msg="Updating TLS secret for kube-system/rke2-serving (count: 10): map[listener.cattle.io/cn-10.251.232.62:10.251.232.62 listener.cattle.io/cn-10.43.0.1:10.43.0.1 listener.cattle.io/cn-127.0.0.1:127.0.0.1 listener.cattle.io/cn-__1-f16284:::1 listener.cattle.io/cn-kubernetes:kubernetes listener.cattle.io/cn-kubernetes.default:kubernetes.default listener.cattle.io/cn-kubernetes.default.svc:kubernetes.default.svc listener.cattle.io/cn-kubernetes.default.svc.cluster.local:kubernetes.default.svc.cluster.local listener.cattle.io/cn-localhost:localhost listener.cattle.io/cn-rke201:rke201 listener.cattle.io/fingerprint:SHA1=0674126B207BDFF8B8AB8A211E01960EB7126904]"
+Sep 25 02:59:45 rke201 rke2[1621]: time="2024-09-25T02:59:45Z" level=info msg="Adding node rke201-ea6dddc1 etcd status condition"
+Sep 25 02:59:46 rke201 rke2[1621]: time="2024-09-25T02:59:46Z" level=info msg="Active TLS secret kube-system/rke2-serving (ver=353) (count 10): map[listener.cattle.io/cn-10.251.232.62:10.251.232.62 listener.cattle.io/cn-10.43.0.1:10.43.0.1 listener.cattle.io/cn-127.0.0.1:127.0.0.1 listener.cattle.io/cn-__1-f16284:::1 listener.cattle.io/cn-kubernetes:kubernetes listener.cattle.io/cn-kubernetes.default:kubernetes.default listener.cattle.io/cn-kubernetes.default.svc:kubernetes.default.svc listener.cattle.io/cn-kubernetes.default.svc.cluster.local:kubernetes.default.svc.cluster.local listener.cattle.io/cn-localhost:localhost listener.cattle.io/cn-rke201:rke201 listener.cattle.io/fingerprint:SHA1=0674126B207BDFF8B8AB8A211E01960EB7126904]"
+Sep 25 02:59:47 rke201 rke2[1621]: time="2024-09-25T02:59:47Z" level=info msg="Labels and annotations have been set successfully on node: rke201"
+Sep 25 03:00:12 rke201 rke2[1621]: time="2024-09-25T03:00:12Z" level=info msg="Tunnel authorizer set Kubelet Port 0.0.0.0:10250"
+
+
+E0925 03:04:44.492184    1646 kuberuntime_manager.go:1168] "CreatePodSandbox for pod failed" err="rpc error: code = Unknown desc = failed to setup network for sandbox \"423df33c4e402c6f6f78276f8bfe67d324615b401ee0b572e57fc01f0b0050b9\": plugin type=\"calico\" failed (add): failed to allocate for range 0: no IP addresses available in range set: 10.42.0.1-10.42.0.254" pod="kube-system/rke2-ingress-nginx-controller-mbv99"
+E0925 03:04:44.492213    1646 pod_workers.go:1298] "Error syncing pod, skipping" err="failed to \"CreatePodSandbox\" for \"rke2-ingress-nginx-controller-mbv99_kube-system(70cb3930-9c2e-423b-8d62-05e2a0394894)\" with CreatePodSandboxError: \"Failed to create sandbox for pod \\\"rke2-ingress-nginx-controller-mbv99_kube-system(70cb3930-9c2e-423b-8d62-05e2a0394894)\\\": rpc error: code = Unknown desc = failed to setup network for sandbox \\\"423df33c4e402c6f6f78276f8bfe67d324615b401ee0b572e57fc01f0b0050b9\\\": plugin type=\\\"calico\\\" failed (add): failed to allocate for range 0: no IP addresses available in range set: 10.42.0.1-10.42.0.254\"" pod="kube-system/rke2-ingress-nginx-controller-mbv99" podUID="70cb3930-9c2e-423b-8d62-05e2a0394894"

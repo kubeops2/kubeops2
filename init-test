@@ -7,6 +7,18 @@ if [ "${DEBUG}" = 1 ]; then
 fi
 
 # usage
+show_env() {
+    if [ -n ${RKE2_ADMIN} ]; then
+        echo "${RKE2_ADMIN}"
+    elif [ -n ${RKE2_TYPE} ]; then
+        echo "${RKE2_TYPE}"
+    elif [ -n ${RKE2_VERSION} ]; then
+        echo "${RKE2_VERSION}"
+    elif [ -n ${RKE2_RUN} ]; then
+        echo "${RKE2_RUN}"
+    fi
+}
+
 usage() {
     echo " 
     This is the curled script to install RKE2 along with Ecosystem provided by KubeOps Team.
@@ -97,6 +109,8 @@ fi
 if [ -z ${RKE2_ADMIN} ]; then
     RKE2_ADMIN=kubeops
 fi
+
+show_env
 
 # # /etc/security/limits.conf 파일 수정
 # info "::: 시스템 전체의 파일 디스크립터 제한 설정 중..."
