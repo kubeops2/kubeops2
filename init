@@ -132,11 +132,3 @@ info "::: Finish ${RKE2_ADMIN} Environment..."
 info "::: Running the below command for testing!!!"
 info "::: source .bashrc && kubectl get nodes"
 sleep 1
-
-
-# # Setting up k9s
-# echo;echo
-# info "::: Install k9s tool..."
-# curl -sS https://webi.sh/k9s | sh
-# source /home/${RKE2_ADMIN}/.config/envman/PATH.env
-# echo "source <(kubectl completion bash)" >> /home/${RKE2_ADMIN}/.bashrc
