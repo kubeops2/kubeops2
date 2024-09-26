@@ -22,7 +22,8 @@ show_env() {
 usage() {
     echo " 
     This is the curled script to install RKE2 along with Ecosystem provided by KubeOps Team.
-    The tool is consisted of two part and it is the first part of script installing RKE2.
+    This Tool is consisted of two part and it is the first part of script for only installing 
+     RKE2 and Configure ADMIN user's kubeconfig environment.
 
 
     ENV_VAR:
@@ -89,7 +90,7 @@ info "::: sudo 로 실행 가능 합니다."
 sleep 1
 
 # Installation processs true or false
-if [ -z ${RKE2_RUN} ] || [ "${RKE2_RUN}" = false ]; then
+if [ -z ${RKE2_RUN} ] || [ ${RKE2_RUN} = false ]; then
     usage
     exit -1
 fi
