@@ -120,80 +120,81 @@ fi
 
 show_env
 
-# # /etc/security/limits.conf 파일 수정
-# info "::: 시스템 전체의 파일 디스크립터 제한 설정 중..."
-# if grep -q "nofile" /etc/security/limits.conf; then
-#     sed -i '/nofile/d' /etc/security/limits.conf
-# fi
-# echo "*       soft    nofile  65535" >> /etc/security/limits.conf
-# echo "*       hard    nofile  65535" >> /etc/security/limits.conf
-# info "완료: /etc/security/limits.conf 파일이 수정되었습니다."
+# /etc/security/limits.conf 파일 수정
+info "::: 시스템 전체의 파일 디스크립터 제한 설정 중..."
+if grep -q "nofile" /etc/security/limits.conf; then
+    sed -i '/nofile/d' /etc/security/limits.conf
+fi
+echo "*       soft    nofile  65535" >> /etc/security/limits.conf
+echo "*       hard    nofile  65535" >> /etc/security/limits.conf
+info "완료: /etc/security/limits.conf 파일이 수정되었습니다."
 
-# # /etc/sysctl.conf 파일 수정
-# info "::: Applying Kernel Parameters..."
-# if grep -q "fs.inotify.max_user_watches" /etc/sysctl.conf; then
-#     sed -i '/fs.inotify.max_user_watches/d' /etc/sysctl.conf
-# fi
-# if grep -q "fs.inotify.max_user_instances" /etc/sysctl.conf; then
-#     sed -i '/fs.inotify.max_user_instances/d' /etc/sysctl.conf
-# fi
+# /etc/sysctl.conf 파일 수정
+info "::: Applying Kernel Parameters..."
+if grep -q "fs.inotify.max_user_watches" /etc/sysctl.conf; then
+    sed -i '/fs.inotify.max_user_watches/d' /etc/sysctl.conf
+fi
+if grep -q "fs.inotify.max_user_instances" /etc/sysctl.conf; then
+    sed -i '/fs.inotify.max_user_instances/d' /etc/sysctl.conf
+fi
 
-# echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf
-# echo "fs.inotify.max_user_instances=512" >> /etc/sysctl.conf
-# info "::: 완료: /etc/sysctl.conf 파일이 수정되었습니다."
+echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf
+echo "fs.inotify.max_user_instances=512" >> /etc/sysctl.conf
+info "::: 완료: /etc/sysctl.conf 파일이 수정되었습니다."
 
-# sysctl -p
+sysctl -p
 
-# # swap off 처리
-# # /etc/fstab 에 swap 라인 주석 처리 필요
-# info "::: Deactivating Swap space..."
-# sed -i 's/\/swap/#swap/g' /etc/fstab
-# swapoff -a
+# swap off 처리
+# /etc/fstab 에 swap 라인 주석 처리 필요
+info "::: Deactivating Swap space..."
+sed -i 's/\/swap/#swap/g' /etc/fstab
+swapoff -a
 
-# # Install Tools
-# info "::: Installing yq and jq ..."
+# Install Tools
+info "::: Installing yq and jq ..."
+apt update
+apt install iptables -y
+snap install yq jq
 # apt update
-# apt install iptables -y
-# snap install yq jq
-# # apt update
 
-# # Install RKE2 As a server
-# echo;echo
-# info "::: Install RKE2 with ${RKE2_VERSION} and ${RKE2_TYPE} mode ..."
-# sleep 1
+# Install RKE2 As a server
+echo;echo
+info "::: Install RKE2 with ${RKE2_VERSION} and ${RKE2_TYPE} mode ..."
+sleep 1
 
 
-# curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${RKE2_VERSION} INSTSLL_RKE2_TYPE=${RKE2_TYPE} sh -
+curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${RKE2_VERSION} INSTSLL_RKE2_TYPE=${RKE2_TYPE} sh -
 
-# echo;echo
-# info "::: Enabling and Starting RKE2-Server service ..."
-# sleep 1
-# systemctl enable rke2-server.service
-# systemctl start rke2-server.service
-# # journalctl -u rke2-server -f
+echo;echo
+info "::: Enabling and Starting RKE2-Server service ..."
+read -p "::: Press Enter or Ctrl+C if you want to stop ..."
+sleep 1
+systemctl enable rke2-server.service
+systemctl start rke2-server.service
+# journalctl -u rke2-server -f
 
-# echo;echo
-# info "::: Done!!! - Enabling and Starting RKE2-Server service ... "
-# sleep 1
+echo;echo
+info "::: Done!!! - Enabling and Starting RKE2-Server service ... "
+sleep 1
 
-# # install helm
-# info "::: Install Helm..."
-# snap install helm --classic
+# install helm
+info "::: Install Helm..."
+snap install helm --classic
 
-# # Setting up User Environment
-# echo;echo
-# info "::: Setting User ${RKE2_ADMIN} Environment..."
-# sleep 1
-# mkdir -p /home/${RKE2_ADMIN}/.kube
-# cp /etc/rancher/rke2/rke2.yaml /home/${RKE2_ADMIN}/.kube/config
-# chown -R ${RKE2_ADMIN}:${RKE2_ADMIN} /home/${RKE2_ADMIN}/.kube
-# chmod 600 /home/${RKE2_ADMIN}/.kube/config
-# echo "KUBECONFIG=/home/${RKE2_ADMIN}/.kube/config" >> /home/${RKE2_ADMIN}/.bashrc
-# echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> /home/${RKE2_ADMIN}/.bashrc
-# source /home/${RKE2_ADMIN}/.bashrc
+# Setting up User Environment
+echo;echo
+info "::: Setting User ${RKE2_ADMIN} Environment..."
+sleep 1
+mkdir -p /home/${RKE2_ADMIN}/.kube
+cp /etc/rancher/rke2/rke2.yaml /home/${RKE2_ADMIN}/.kube/config
+chown -R ${RKE2_ADMIN}:${RKE2_ADMIN} /home/${RKE2_ADMIN}/.kube
+chmod 600 /home/${RKE2_ADMIN}/.kube/config
+echo "KUBECONFIG=/home/${RKE2_ADMIN}/.kube/config" >> /home/${RKE2_ADMIN}/.bashrc
+echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> /home/${RKE2_ADMIN}/.bashrc
+source /home/${RKE2_ADMIN}/.bashrc
 
-# echo;echo
-# info "::: Finish ${RKE2_ADMIN} Environment..."
-# info "::: Running the below command for testing!!!"
-# info "::: source .bashrc && kubectl get nodes"
-# sleep 1
+echo;echo
+info "::: Finish ${RKE2_ADMIN} Environment..."
+info "::: Running the below command for testing!!!"
+info "::: source .bashrc && kubectl get nodes"
+sleep 1
