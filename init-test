@@ -8,13 +8,13 @@ fi
 
 # usage
 show_env() {
-    if [ -n ${RKE2_ADMIN} ]; then
+    if [ -n "${RKE2_ADMIN}" ]; then
         echo "${RKE2_ADMIN}"
-    elif [ -n ${RKE2_TYPE} ]; then
+    elif [ -n "${RKE2_TYPE}" ]; then
         echo "${RKE2_TYPE}"
-    elif [ -n ${RKE2_VERSION} ]; then
+    elif [ -n "${RKE2_VERSION}" ]; then
         echo "${RKE2_VERSION}"
-    elif [ -n ${RKE2_RUN} ]; then
+    elif [ -n "${RKE2_RUN}" ]; then
         echo "${RKE2_RUN}"
     fi
 }
@@ -90,7 +90,7 @@ info "::: sudo 로 실행 가능 합니다."
 sleep 1
 
 # Installation processs true or false
-if [ -z ${RKE2_RUN} ] || [ ${RKE2_RUN} = false ]; then
+if [ -z "${RKE2_RUN}" ] || [ "${RKE2_RUN}" = false ]; then
     usage
     exit -1
 fi
