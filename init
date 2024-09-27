@@ -121,15 +121,12 @@ install_gum() {
 
 # install yjq
 install_yjq() {
-    snap install core
-    snap list | grep -iq yq
-    if [ $? -eq 1 ]; then
+    if ! $(which yq &> /dev/null); then
         info "::: Install yq using snap ..."
         snap install yq
     fi
 
-    snap list | grep -iq jq
-    if [ $? -eq 1 ]; then
+    if ! $(which jq &> /dev/null); then
         info "::: Install jq using snap ..."
         snap install jq
     fi
@@ -173,7 +170,7 @@ RKE2_ADMIN=$(gum input --value='kubeops' --header='::: RKE2 Admin Account - ')
 info "::: RKE2_ADMIN - ${RKE2_ADMIN}"
 
 double_line
-echo -e "# RKE2 Installation Config\n- RKE2_VERSION : ${RKE2_VERSION}\n- RKE2_TYPE : ${RKE2_TYPE}\n- RKE2_ADMIN : ${RKE2_ADMIN}" | gum format
+echo -e "# RKE2 Installation Config\n- RKE2_VERSION : ${RKE2_VERSION}\n- RKE2_TYPE : ${RKE2_TYPE}\n- RKE2_ADMIN : ${RKE2_ADMIN}\n" | gum format
 
 if $(gum confirm); then
     info "::: Proceeding Install Process RKE2 ..."
