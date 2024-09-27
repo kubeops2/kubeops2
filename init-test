@@ -119,6 +119,21 @@ install_gum() {
     info "::: Finished installation of Gum ..."
 }
 
+# install yjq
+install_yjq() {
+    yq &> /dev/null
+    if [ $? -eq 1 ]; then
+        info "::: Install yq using snap ..."
+        snap install yq
+    fi
+
+    jq &> /dev/null
+    if [ $? -eq 1 ]; then
+        info "::: Install jq using snap ..."
+        snap install jq
+    fi
+}
+
 # 루트 권한 확인
 if [ "$EUID" -ne 0 ]
   then info "::: 이 스크립트는 sudo 권한으로 실행해야 합니다."
@@ -197,11 +212,10 @@ sed -i 's/\/swap/#swap/g' /etc/fstab
 swapoff -a
 
 # Install Tools
-info "::: Installing yq and jq ..."
+info "::: Install Iptables for CANAL CNI"
 apt update
 apt install iptables -y
-snap install yq jq
-# apt update
+install_yjq
 
 # Install RKE2 As a server
 double_line

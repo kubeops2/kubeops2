@@ -65,12 +65,12 @@ show_env() {
 usage() {
     echo " 
     This is CURLED Script to Install RKE2 along with Ecosystem provided by OpsNow KubeOps Team.
-    This Tool is the First part and It is the script For only Installing RKE2 
+    This Script is the First part and It is the script For only Installing RKE2 
     And Configuring ADMIN user's kubeconfig Environment.
 
     Steps.
         1. Install RKE2 and kubeconfig Env.
-            $ curl {URL/init} | sudo RKE2_RUN=true ENV_VAR=... ENV_VAR2=... bash
+            $ curl {URL/init} | sudo RKE2_RUN=true bash
 
         2. Install Ecosystems on RKE2
             $ curl {URL/tools} | TOOL_VAR=... TOOL_VAR2=... bash
@@ -97,13 +97,41 @@ usage() {
 
 
     Usage: 
-            curl <this script URL> | sudo RKE2_RUN=true ENV_VAR=... ENV_VAR2=... bash
+            curl <this script URL> | sudo RKE2_RUN=true bash
 
                 OR
 
             As Root, 
-            curl <this script URL> | RKE2_RUN=true ENV_VAR=... ENV_VAR2=... bash
+            curl <this script URL> | RKE2_RUN=true bash
 "
+}
+
+# install gum
+install_gum() {
+    info "::: Install Gum..."
+    if ! $(dpkg -s gum &> /dev/null); then
+        sudo mkdir -p /etc/apt/keyrings
+        curl -fsSL https://repo.charm.sh/apt/gpg.key | gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | tee /etc/apt/sources.list.d/charm.list
+        apt update && apt install gum
+    fi
+    double_line
+    info "::: Finished installation of Gum ..."
+}
+
+# install yjq
+install_yjq() {
+    yq &> /dev/null
+    if [ $? -eq 1 ]; then
+        info "::: Install yq using snap ..."
+        snap install yq
+    fi
+
+    jq &> /dev/null
+    if [ $? -eq 1 ]; then
+        info "::: Install jq using snap ..."
+        snap install jq
+    fi
 }
 
 # 루트 권한 확인
@@ -125,16 +153,32 @@ fi
 # line breaker
 double_line
 
+# install GUM
+install_gum
+
 # Check variables
 # INSTALL_RKE2_VERSION 과 INSTALL_RKE2_TYPE 그리고 admin 계정을 체크한다.
-if [ -z "${RKE2_VERSION}" ]; then
-    RKE2_VERSION=v1.30.5-rc3+rke2r1
-fi
-if [ -z "${RKE2_TYPE}" ]; then
-    RKE2_TYPE=server
-fi
-if [ -z "${RKE2_ADMIN}" ]; then
-    RKE2_ADMIN=kubeops
+
+info "::: Start Setting RKE2 Configuration!!! :::"
+sleep 3
+double_line
+RKE2_VERSION=$(gum choose --header="::: Choose RKE2 Version - " v1.30.5-rc3+rke2r1 latest)
+info "::: RKE2_VERSION - ${RKE2_VERSION}"
+
+RKE2_TYPE=$(gum choose --header="::: Choose RKE2 Type - " server agent)
+info "::: RKE2_TYPE - ${RKE2_TYPE}"
+
+RKE2_ADMIN=$(gum input --value='kubeops' --header='::: RKE2 Admin Account - ')
+info "::: RKE2_ADMIN - ${RKE2_ADMIN}"
+
+double_line
+echo -e "# RKE2 Installation Config\n- RKE2_VERSION : ${RKE2_VERSION}\n- RKE2_TYPE : ${RKE2_TYPE}\n- RKE2_ADMIN : ${RKE2_ADMIN}" | gum format
+
+if $(gum confirm); then
+    info "::: Proceeding Install Process RKE2 ..."
+else
+    info "::: Cancel Installation RKE2 ..."
+    exit -1
 fi
 
 # /etc/security/limits.conf 파일 수정
@@ -168,11 +212,10 @@ sed -i 's/\/swap/#swap/g' /etc/fstab
 swapoff -a
 
 # Install Tools
-info "::: Installing yq and jq ..."
+info "::: Install Iptables for CANAL CNI"
 apt update
 apt install iptables -y
-snap install yq jq
-# apt update
+install_yjq
 
 # Install RKE2 As a server
 double_line
