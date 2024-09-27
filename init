@@ -121,13 +121,13 @@ install_gum() {
 
 # install yjq
 install_yjq() {
-    yq &> /dev/null
+    snap list | grep -iq yq
     if [ $? -eq 1 ]; then
         info "::: Install yq using snap ..."
         snap install yq
     fi
 
-    jq &> /dev/null
+    snap list | grep -iq jq
     if [ $? -eq 1 ]; then
         info "::: Install jq using snap ..."
         snap install jq
