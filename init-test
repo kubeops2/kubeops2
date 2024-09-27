@@ -65,12 +65,12 @@ show_env() {
 usage() {
     echo " 
     This is CURLED Script to Install RKE2 along with Ecosystem provided by OpsNow KubeOps Team.
-    This Tool is the First part and It is the script For only Installing RKE2 
+    This Script is the First part and It is the script For only Installing RKE2 
     And Configuring ADMIN user's kubeconfig Environment.
 
     Steps.
         1. Install RKE2 and kubeconfig Env.
-            $ curl {URL/init} | sudo RKE2_RUN=true ENV_VAR=... ENV_VAR2=... bash
+            $ curl {URL/init} | sudo RKE2_RUN=true bash
 
         2. Install Ecosystems on RKE2
             $ curl {URL/tools} | TOOL_VAR=... TOOL_VAR2=... bash
@@ -97,14 +97,26 @@ usage() {
 
 
     Usage: 
-            curl <this script URL> | sudo RKE2_RUN=true ENV_VAR=... ENV_VAR2=... bash
+            curl <this script URL> | sudo RKE2_RUN=true bash
 
                 OR
 
             As Root, 
-            curl <this script URL> | RKE2_RUN=true ENV_VAR=... ENV_VAR2=... bash
+            curl <this script URL> | RKE2_RUN=true bash
 "
 }
+
+install_gum() {
+    info "::: Install Gum..."
+    sudo mkdir -p /etc/apt/keyrings
+    curl -fsSL https://repo.charm.sh/apt/gpg.key | gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | tee /etc/apt/sources.list.d/charm.list
+    apt update && apt install gum
+    
+    double_line
+    info "::: Finished installation of Gum ..."
+}
+
 
 # 루트 권한 확인
 if [ "$EUID" -ne 0 ]
@@ -125,16 +137,20 @@ fi
 # line breaker
 double_line
 
+# install GUM
+install_gum
+
 # Check variables
 # INSTALL_RKE2_VERSION 과 INSTALL_RKE2_TYPE 그리고 admin 계정을 체크한다.
-if [ -z "${RKE2_VERSION}" ]; then
-    RKE2_VERSION=v1.30.5-rc3+rke2r1
-fi
-if [ -z "${RKE2_TYPE}" ]; then
-    RKE2_TYPE=server
-fi
-if [ -z "${RKE2_ADMIN}" ]; then
-    RKE2_ADMIN=kubeops
+RKE2_VERSION=$(gum choose --header="::: Choose RKE2 Version - " v1.30.5-rc3+rke2r1, latest)
+RRKE2_TYPE=$(gum choose --header="::: Choose RKE2 Type - " server agent)
+RKE2_ADMIN=$(gum input --value='kubeops' --header='::: RKE2 Admin Account - ')
+
+if $(gum confirm); then
+    info "::: Proceeding Install Process RKE2 ..."
+else
+    info "::: Cancel Installation RKE2 ..."
+    exit -1
 fi
 
 # /etc/security/limits.conf 파일 수정
