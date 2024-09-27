@@ -147,7 +147,7 @@ install_gum
 info "::: Start Setting RKE2 Configuration!!! :::"
 sleep 3
 double_line
-RKE2_VERSION=$(gum choose --header="::: Choose RKE2 Version - " v1.30.5-rc3+rke2r1, latest)
+RKE2_VERSION=$(gum choose --header="::: Choose RKE2 Version - " v1.30.5-rc3+rke2r1 latest)
 info "::: RKE2_VERSION - ${RKE2_VERSION}"
 
 RKE2_TYPE=$(gum choose --header="::: Choose RKE2 Type - " server agent)
