@@ -121,6 +121,7 @@ install_gum() {
 
 # install yjq
 install_yjq() {
+    snap install core
     snap list | grep -iq yq
     if [ $? -eq 1 ]; then
         info "::: Install yq using snap ..."
