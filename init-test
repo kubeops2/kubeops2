@@ -106,17 +106,18 @@ usage() {
 "
 }
 
+# install gum
 install_gum() {
     info "::: Install Gum..."
-    sudo mkdir -p /etc/apt/keyrings
-    curl -fsSL https://repo.charm.sh/apt/gpg.key | gpg --dearmor -o /etc/apt/keyrings/charm.gpg
-    echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | tee /etc/apt/sources.list.d/charm.list
-    apt update && apt install gum
-    
+    if ! $(dpkg -s gum &> /dev/null); then
+        sudo mkdir -p /etc/apt/keyrings
+        curl -fsSL https://repo.charm.sh/apt/gpg.key | gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | tee /etc/apt/sources.list.d/charm.list
+        apt update && apt install gum
+    fi
     double_line
     info "::: Finished installation of Gum ..."
 }
-
 
 # 루트 권한 확인
 if [ "$EUID" -ne 0 ]
@@ -142,25 +143,25 @@ install_gum
 
 # Check variables
 # INSTALL_RKE2_VERSION 과 INSTALL_RKE2_TYPE 그리고 admin 계정을 체크한다.
+
+info "::: Start Setting RKE2 Configuration!!! :::"
+sleep 3
 double_line
 RKE2_VERSION=$(gum choose --header="::: Choose RKE2 Version - " v1.30.5-rc3+rke2r1, latest)
 info "::: RKE2_VERSION - ${RKE2_VERSION}"
 
-double_line
-RRKE2_TYPE=$(gum choose --header="::: Choose RKE2 Type - " server agent)
+RKE2_TYPE=$(gum choose --header="::: Choose RKE2 Type - " server agent)
 info "::: RKE2_TYPE - ${RKE2_TYPE}"
 
-double_line
 RKE2_ADMIN=$(gum input --value='kubeops' --header='::: RKE2 Admin Account - ')
 info "::: RKE2_ADMIN - ${RKE2_ADMIN}"
 
-echo "# RKE2 Installation Config\n- RKE2_VERSION : ${RKE2_VERSION}\n-RKE2_TYPE : ${RKE2_TYPE}\n-RKE2_ADMIN : ${RKE2_ADMIN}" | gum format
+double_line
+echo -e "# RKE2 Installation Config\n- RKE2_VERSION : ${RKE2_VERSION}\n- RKE2_TYPE : ${RKE2_TYPE}\n- RKE2_ADMIN : ${RKE2_ADMIN}" | gum format
 
 if $(gum confirm); then
-    double_line
     info "::: Proceeding Install Process RKE2 ..."
 else
-    double_line
     info "::: Cancel Installation RKE2 ..."
     exit -1
 fi
