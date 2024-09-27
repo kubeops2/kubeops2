@@ -9,6 +9,8 @@ fi
 # variables
 RKE2_TOKEN_PATH=/var/lib/rancher/rke2/server/node-token
 RKE2_CONFIG_YAML_PATH=/etc/rancher/rke2/config.yaml
+RKE2_AVVER="v1.30.5+rke2r1 v1.31.1+rke2r1 v1.29.9+rke2r1"
+RKE2_AVTYPE="server agent"
 
 # double line
 double_line() {
@@ -160,17 +162,17 @@ install_gum
 info "::: Start Setting RKE2 Configuration!!! :::"
 sleep 3
 double_line
-RKE2_VERSION=$(gum choose --header="::: Choose RKE2 Version - " v1.30.5-rc3+rke2r1 latest)
+RKE2_VERSION=$(gum choose --header="::: Choose RKE2 Version - " ${RKE2_AVVER})
 info "::: RKE2_VERSION - ${RKE2_VERSION}"
 
-RKE2_TYPE=$(gum choose --header="::: Choose RKE2 Type - " server agent)
+RKE2_TYPE=$(gum choose --header="::: Choose RKE2 Type - " ${RKE2_AVTYPE})
 info "::: RKE2_TYPE - ${RKE2_TYPE}"
 
 RKE2_ADMIN=$(gum input --value='kubeops' --header='::: RKE2 Admin Account - ')
 info "::: RKE2_ADMIN - ${RKE2_ADMIN}"
 
 double_line
-echo -e "# RKE2 Installation Config\n- RKE2_VERSION : ${RKE2_VERSION}\n- RKE2_TYPE : ${RKE2_TYPE}\n- RKE2_ADMIN : ${RKE2_ADMIN}\n" | gum format
+echo -e "# RKE2 Installation Config\n- RKE2_VERSION : ${RKE2_VERSION}\n- RKE2_TYPE : ${RKE2_TYPE}\n- RKE2_ADMIN : ${RKE2_ADMIN}  " | gum format
 
 if $(gum confirm); then
     info "::: Proceeding Install Process RKE2 ..."
