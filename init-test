@@ -109,7 +109,7 @@ usage() {
 "
 }
 
-# install gum function
+# install gum
 install_gum() {
     info "::: Install Gum..."
     if ! $(dpkg -s gum &> /dev/null); then
