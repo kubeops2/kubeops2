@@ -48,7 +48,7 @@ server_config() {
     info "::: Applying Server config"
 }
 
-# usage
+# check conditional function for RKE2 Variables
 show_env() {
     if [ -n "${RKE2_ADMIN}" ]; then
         echo "${RKE2_ADMIN}"
@@ -64,6 +64,7 @@ show_env() {
     fi
 }
 
+# show usage of this tool
 usage() {
     echo " 
     This is CURLED Script to Install RKE2 along with Ecosystem provided by OpsNow KubeOps Team.
@@ -108,7 +109,7 @@ usage() {
 "
 }
 
-# install gum
+# install gum function
 install_gum() {
     info "::: Install Gum..."
     if ! $(dpkg -s gum &> /dev/null); then
