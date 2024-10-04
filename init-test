@@ -116,9 +116,9 @@ install_yjq() {
 
 # check RKE2 CONFIG DIR and File
 check_config_dir() {
-    if [ ! -d $(dirname ${RKE2_CONFIG_YAML}) ]; then
-        mkdir -p $(dirname ${RKE2_CONFIG_YAML})
-        touch ${RKE2_CONFIG_YAML}    
+    if [ ! -d $(dirname "${RKE2_CONFIG_YAML}") ]; then
+        mkdir -p $(dirname "${RKE2_CONFIG_YAML}")
+        touch "${RKE2_CONFIG_YAML}"
 }
 
 # RKE2 server config
