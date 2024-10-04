@@ -275,12 +275,12 @@ double_line
 info "::: Install RKE2 with ${RKE2_VERSION} and ${RKE2_TYPE} mode ..."
 sleep 1
 
-curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${RKE2_VERSION} INSTSLL_RKE2_TYPE=${RKE2_TYPE} sh -
+# curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${RKE2_VERSION} INSTSLL_RKE2_TYPE=${RKE2_TYPE} sh -
 
 double_line
 info "::: Enabling and Starting RKE2-Server service ..."
 sleep 1
-systemctl enable rke2-server.service
+# systemctl enable rke2-server.service
 
 # Configure Cluster and Agent
 if [ "${RKE2_TYPE}" = 'server' ]; then
@@ -300,7 +300,7 @@ elif [ "${RKE2_TYPE}" = 'agent' ]; then
     agent_config
 fi
 
-systemctl start rke2-server.service
+# systemctl start rke2-server.service
 # journalctl -u rke2-server -f
 
 double_line
@@ -308,20 +308,20 @@ info "::: Done!!! - Enabling and Starting RKE2-Server service ... "
 sleep 1
 
 # install helm
-info "::: Install Helm..."
-snap install helm --classic
+# info "::: Install Helm..."
+# snap install helm --classic
 
 # Setting up User Environment
 double_line
 info "::: Setting User ${RKE2_ADMIN} Environment..."
 sleep 1
-mkdir -p /home/${RKE2_ADMIN}/.kube
-cp /etc/rancher/rke2/rke2.yaml /home/${RKE2_ADMIN}/.kube/config
-chown -R ${RKE2_ADMIN}:${RKE2_ADMIN} /home/${RKE2_ADMIN}/.kube
-chmod 600 /home/${RKE2_ADMIN}/.kube/config
-echo "KUBECONFIG=/home/${RKE2_ADMIN}/.kube/config" >> /home/${RKE2_ADMIN}/.bashrc
-echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> /home/${RKE2_ADMIN}/.bashrc
-source /home/${RKE2_ADMIN}/.bashrc
+# mkdir -p /home/${RKE2_ADMIN}/.kube
+# cp /etc/rancher/rke2/rke2.yaml /home/${RKE2_ADMIN}/.kube/config
+# chown -R ${RKE2_ADMIN}:${RKE2_ADMIN} /home/${RKE2_ADMIN}/.kube
+# chmod 600 /home/${RKE2_ADMIN}/.kube/config
+# echo "KUBECONFIG=/home/${RKE2_ADMIN}/.kube/config" >> /home/${RKE2_ADMIN}/.bashrc
+# echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> /home/${RKE2_ADMIN}/.bashrc
+# source /home/${RKE2_ADMIN}/.bashrc
 
 double_line
 info "::: Finish ${RKE2_ADMIN} Environment..."
