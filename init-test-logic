@@ -120,7 +120,7 @@ EOF
 
         # Generating config.yaml for Master nodes
         double_line
-        gum spin --spinner dot --title "::: Generating ${RKE2_CONFIG_YAML_4SERVER} for Another Masters ... " -- sleep ${RUNDELAY}
+        info "::: Generating ${RKE2_CONFIG_YAML_4SERVER} for Another Masters ... "
         cat <<EOF > ${RKE2_CONFIG_YAML_4SERVER}
 server: https://${L4_IP}:9345
 token: ${RKE2_TOKEN}
@@ -131,7 +131,7 @@ tls-san:
   - ${NODE3_IP}
 EOF
         double_line
-        gum spin --spinner dot --title "::: Generating ${RKE2_CONFIG_YAML_4AGENT} for Workers ... " -- sleep ${RUNDELAY}
+        info "::: Generating ${RKE2_CONFIG_YAML_4AGENT} for Workers ... "
         cat <<EOF > ${RKE2_CONFIG_YAML_4AGENT}
 server: https://${L4_IP}:9345
 token: ${RKE2_TOKEN}
