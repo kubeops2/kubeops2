@@ -10,19 +10,6 @@ fi
 INITENV='https://raw.githubusercontent.com/kubeops2/kubeops2/refs/heads/main/initenv'
 KUBEOPS_VERSIONS='https://raw.githubusercontent.com/kubeops2/kubeops2/refs/heads/main/versions'
 
-# loading environtal variables using curl
-curlsource() {
-    info "::: Loading Environtal Variables from KubeOps2 Github..."
-    f=$(mktemp -t curlsource.XXX)
-    curl -o "$f" -sSL "$1"
-    source "$f"
-    rm -f "$f"
-}
-
-# import all required variables for installation
-curlsource ${INITENV}
-curlsource ${KUBEOPS_VERSIONS}
-
 # double line
 double_line() {
     echo;echo
@@ -46,6 +33,19 @@ fatal() {
     fi
     exit 1
 }
+
+# loading environtal variables using curl
+curlsource() {
+    info "::: Loading Environtal Variables from KubeOps2 Github..."
+    f=$(mktemp -t curlsource.XXX)
+    curl -o "$f" -sSL "$1"
+    source "$f"
+    rm -f "$f"
+}
+
+# import all required variables for installation
+curlsource ${INITENV}
+curlsource ${KUBEOPS_VERSIONS}
 
 # show usage of this tool
 usage() {
