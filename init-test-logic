@@ -7,7 +7,21 @@ if [ "${DEBUG}" = 1 ]; then
 fi
 
 # variables
+INITENV='https://raw.githubusercontent.com/kubeops2/kubeops2/refs/heads/main/initenv'
 KUBEOPS_VERSIONS='https://raw.githubusercontent.com/kubeops2/kubeops2/refs/heads/main/versions'
+
+# loading environtal variables using curl
+curlsource() {
+    info "::: Loading Environtal Variables from KubeOps2 Github..."
+    f=$(mktemp -t curlsource.XXX)
+    curl -o "$f" -sSL "$1"
+    source "$f"
+    rm -f "$f"
+}
+
+# import all required variables for installation
+curlsource ${INITENV}
+curlsource ${KUBEOPS_VERSIONS}
 
 # double line
 double_line() {
@@ -35,57 +49,7 @@ fatal() {
 
 # show usage of this tool
 usage() {
-    echo "
-    This is CURLED Script to Install RKE2 along with Ecosystem provided by OpsNow KubeOps Team.
-    This Script is the First part and It is the script For only Installing RKE2 
-    And Configuring ADMIN user's kubeconfig Environment.
-
-    Steps.
-        1. Install RKE2 and kubeconfig Env.
-            $ curl {URL/init} | sudo RKE2_RUN=true bash
-
-        2. Install Ecosystems on RKE2
-            $ curl {URL/tools} | TOOL_VAR=... TOOL_VAR2=... bash
-
-
-    ENV_VAR:
-        - RKE2_VERSION
-            Install RKE2 with this version.
-            * default : v1.30.5-rc3+rke2r1
-
-        - RKE2_TYPE
-            Install RKE2 with this mode.
-            * value : [server | agent]
-            * default : server
-
-        - RKE2_ADMIN
-            Install RKE2 and then Configure kubeconfig on this account.
-            This account should be exist already with sudo permission.
-            * default : kubeops
-
-        - RKE2_RUN
-            Install RKE2 if this value is 'true'.
-            default : falase
-
-
-    Usage: 
-            curl <this script URL> | sudo RKE2_RUN=true bash
-
-                OR
-
-            As Root, 
-            curl <this script URL> | RKE2_RUN=true bash
-"
-}
-
-# bash sourcing from curled file like github
-curlsource() {
-    info "::: Loading Environtal Variables from KubeOps2 Github..."
-    sleep 1
-    f=$(mktemp -t curlsource.XXX)
-    curl -o "$f" -sSL "$1"
-    source "$f"
-    rm -f "$f"
+    echo ${INIT_USAGE}
 }
 
 # install gum
@@ -114,9 +78,6 @@ install_yjq() {
     fi
 }
 
-# import all required variables for installation
-curlsource ${KUBEOPS_VERSIONS}
-
 # check RKE2 CONFIG DIR and File
 check_config_dir() {
     if [ ! -d $(dirname "${RKE2_CONFIG_YAML}") ]; then
@@ -127,76 +88,101 @@ check_config_dir() {
 
 # RKE2 server config
 cluster_config() {
-    gum spin --spinner dot --title "::: Start Configuring RKE2 Cluster :::" -- sleep 3
+    gum spin --spinner dot --title "::: Start Configuring RKE2 Cluster :::" -- sleep ${RUNDELAY}
     check_config_dir
     RKE2_TOKEN=$(cat ${RKE2_TOKEN_PATH})
-    while :; do
-        L4_IP=$(gum input --header="::: Enter LoadBalancer IP Address - ")
-        NODE1_IP=$(gum input --header="::: Enter 1st Node IP Address - ")
-        NODE2_IP=$(gum input --header="::: Enter 2nd Node IP Address - ")
-        NODE3_IP=$(gum input --header="::: Enter 3rd Node IP Address - ")
-
-        echo -e "# RKE2 Cluster Config\n- L4_IP : ${L4_IP}\n- NODE1_IP : ${NODE1_IP}\n- NODE2_IP : ${NODE2_IP}\n- NODE3_IP : ${NODE3_IP}  " | gum format
-        if $(gum confirm "Everything is correct ?"); then
-            break
-        else
-            continue
-        fi
-    done
-
-    if $(gum confirm "First Master Server ?"); then
-        gum spin --spinner dot --title "::: Generating RKE2 config.yaml ... " -- sleep 3
-        RKE2_CONFIG=$(gum write --header='Enter, If all configs are Correct.' --value="token: ${RKE2_TOKEN}
-tls-san:
-  - ${L4_IP}
-  - ${NODE1_IP}
-  - ${NODE2_IP}
-  - ${NODE3_IP}
-")
-        echo "${RKE2_CONFIG}" > ${RKE2_CONFIG_YAML}
-        gum spin --spinner dot --title "::: Generating RKE2 Another Master Nodes config.yaml ... " -- sleep 3
-        gum write --header='Copy the below and Save it to Notes.' --value="server: https://${L4_IP}:9345
-token: ${RKE2_TOKEN}
-tls-san:
-  - ${L4_IP}
-  - ${NODE1_IP}
-  - ${NODE2_IP}
-  - ${NODE3_IP}
-"
-        gum spin --spinner dot --title "::: Generating RKE2 Worker config.yaml ... " -- sleep 3
-        gum write --header='Copy the below and Save it to Notes.' --value="server: https://${L4_IP}:9345
-token: ${RKE2_TOKEN}
-"
-    else
-        gum spin --spinner dot --title "::: Config RKE2 Additional Master Nodes ... " -- sleep 3
+    if $(gum confirm "First Master ?"); then
         while :; do
-            RKE2_NODE_CONFIG=$(gum write --placeholder "Paste the configuration you copied before being shown on the screen.")
-            gum confirm "Confirm ? " && break
-            gum confirm "Wanna exit ?" && break
+            double_line
+            L4_IP=$(gum input --header="::: Enter LoadBalancer IP Address - " --value=${GUM_CASE_L4_IP})
+            NODE1_IP=$(gum input --header="::: Enter 1st Node IP Address - " --value=${GUM_CASE_NODE_IP})
+            NODE2_IP=$(gum input --header="::: Enter 2nd Node IP Address - " --value=${GUM_CASE_NODE_IP})
+            NODE3_IP=$(gum input --header="::: Enter 3rd Node IP Address - " --value=${GUM_CASE_NODE1_IP})
+            
+            double_line
+            gum write --header='Check the below and Enter' <<EOF > ${RKE2_CONFIG_YAML}
+token: ${RKE2_TOKEN}
+tls-san:
+  - ${L4_IP}
+  - ${NODE1_IP}
+  - ${NODE2_IP}
+  - ${NODE3_IP}
+EOF
+            if $(gum confirm "Is Everything Correct ?"); then
+                double_line
+                info "::: ${RKE2_CONFIG_YAML} file is saved ..."
+                break
+            else
+                info "::: Generating config.yaml Again ..."
+                continue
+            fi
+        done
+
+        # Generating config.yaml for Master nodes
+        double_line
+        gum spin --spinner dot --title "::: Generating ${RKE2_CONFIG_YAML_4SERVER} for Another Masters ... " -- sleep ${RUNDELAY}
+        gum write --header='Check config.yaml for Another Masters and then Enter' <<EOF > ${RKE2_CONFIG_YAML_4SERVER}
+server: https://${L4_IP}:9345
+token: ${RKE2_TOKEN}
+tls-san:
+  - ${L4_IP}
+  - ${NODE1_IP}
+  - ${NODE2_IP}
+  - ${NODE3_IP}
+EOF
+
+        double_line
+        gum spin --spinner dot --title "::: Generating ${RKE2_CONFIG_YAML_4AGENT} for Workers ... " -- sleep ${RUNDELAY}
+        gum write --header='Check config.yaml for Worker nodes and then Enter' <<EOF > ${RKE2_CONFIG_YAML_4AGENT}
+server: https://${L4_IP}:9345
+token: ${RKE2_TOKEN}
+EOF
+    else
+        gum spin --spinner dot --title "::: Config RKE2 Additional Master Nodes ... " -- sleep ${RUNDELAY}
+        # loading server config.yaml file
+        while :; do
+            double_line
+            gum write --header="Check the belows and Enter..." < ${RKE2_CONFIG_YAML_4SERVER}
+            if $(gum confirm "Is Everything Correct ?"); then
+                double_line
+                info "::: ${RKE2_CONFIG_YAML_4SERVER} file is saved ..."
+                break
+            else
+                info "::: Generating config.yaml Again ..."
+                continue
+            fi
         done
     fi
 }
 
 # RKE2 agent config
 agent_config() {
-    gum spin --spinner dot --title "::: Config RKE2 Worker Nodes ... " -- sleep 3
+    gum spin --spinner dot --title "::: Config RKE2 Worker Node ... " -- sleep ${RUNDELAY}
     check_config_dir
+    # loading server config.yaml file
     while :; do
-        RKE2_NODE_CONFIG=$(gum write --placeholder "Paste the configuration you copied before being shown on the screen.")
-        gum confirm "Confirm ? " && break
-        gum confirm "Wanna exit ?" && break
+        double_line
+        gum write --header "Check the belows and Enter ..." < ${RKE2_CONFIG_YAML_4AGENT}
+        if $(gum confirm "Is Everything Correct ?"); then
+            double_line
+            info "::: ${RKE2_CONFIG_YAML_4AGENT} file is saved ..."
+            break
+        else
+            info "::: Generating config.yaml Again ..."
+            continue
+        fi        
     done
 }
 
 # check sudo permission
-if [ "$EUID" -ne 0 ]; then
-  info "::: 이 스크립트는 sudo 권한으로 실행해야 합니다."
+if [ "$EUID" -ne 0 ]
+  then info "::: 이 스크립트는 sudo 권한으로 실행해야 합니다."
   info "::: ex> $ curl -sSL url | sudo bash"
   exit -1
 fi
 
 info "::: sudo 권한 확인"
-sleep 1
+sleep ${RUNDELAY}
 
 # Installation Flag: true or false
 if [ -z "${RKE2_RUN}" ]; then # || [ "${RKE2_RUN}" = false ]; then
@@ -214,7 +200,7 @@ install_gum
 # INSTALL_RKE2_VERSION 과 INSTALL_RKE2_TYPE 그리고 admin 계정을 체크한다.
 
 info "::: Start Setting RKE2 Configuration!!! :::"
-sleep 3
+sleep ${RUNDELAY}
 double_line
 RKE2_VERSION=$(gum choose --header="::: Choose RKE2 Version - " ${RKE2_ALL_VERSIONS})
 info "::: RKE2_VERSION - ${RKE2_VERSION}"
@@ -237,24 +223,24 @@ fi
 
 # /etc/security/limits.conf 파일 수정
 info "::: 시스템 전체의 파일 디스크립터 제한 설정 중..."
-if grep -q "nofile" /etc/security/limits.conf; then
-    sed -i '/nofile/d' /etc/security/limits.conf
-fi
-echo "*       soft    nofile  65535" >> /etc/security/limits.conf
-echo "*       hard    nofile  65535" >> /etc/security/limits.conf
+# if grep -q "nofile" /etc/security/limits.conf; then
+#     sed -i '/nofile/d' /etc/security/limits.conf
+# fi
+# echo "*       soft    nofile  65535" >> /etc/security/limits.conf
+# echo "*       hard    nofile  65535" >> /etc/security/limits.conf
 info "완료: /etc/security/limits.conf 파일이 수정되었습니다."
 
 # /etc/sysctl.conf 파일 수정
 info "::: Applying Kernel Parameters..."
-if grep -q "fs.inotify.max_user_watches" /etc/sysctl.conf; then
-    sed -i '/fs.inotify.max_user_watches/d' /etc/sysctl.conf
-fi
-if grep -q "fs.inotify.max_user_instances" /etc/sysctl.conf; then
-    sed -i '/fs.inotify.max_user_instances/d' /etc/sysctl.conf
-fi
+# if grep -q "fs.inotify.max_user_watches" /etc/sysctl.conf; then
+#     sed -i '/fs.inotify.max_user_watches/d' /etc/sysctl.conf
+# fi
+# if grep -q "fs.inotify.max_user_instances" /etc/sysctl.conf; then
+#     sed -i '/fs.inotify.max_user_instances/d' /etc/sysctl.conf
+# fi
 
-echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf
-echo "fs.inotify.max_user_instances=512" >> /etc/sysctl.conf
+# echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf
+# echo "fs.inotify.max_user_instances=512" >> /etc/sysctl.conf
 info "::: 완료: /etc/sysctl.conf 파일이 수정되었습니다."
 
 sysctl -p
@@ -262,25 +248,25 @@ sysctl -p
 # swap off 처리
 # /etc/fstab 에 swap 라인 주석 처리 필요
 info "::: Deactivating Swap space..."
-sed -i 's/\/swap/#swap/g' /etc/fstab
-swapoff -a
+# sed -i 's/\/swap/#swap/g' /etc/fstab
+# swapoff -a
 
 # Install Tools
 info "::: Install Iptables for CANAL CNI"
-apt update
-apt install iptables -y
-install_yjq
+# apt update
+# apt install iptables -y
+# install_yjq
 
 # Install RKE2 As a server
 double_line
 info "::: Install RKE2 with ${RKE2_VERSION} and ${RKE2_TYPE} mode ..."
-sleep 1
+sleep ${RUNDELAY}
 
 # curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${RKE2_VERSION} INSTSLL_RKE2_TYPE=${RKE2_TYPE} sh -
 
 double_line
 info "::: Enabling and Starting RKE2-Server service ..."
-sleep 1
+sleep ${RUNDELAY}
 # systemctl enable rke2-server.service
 
 # Configure Cluster and Agent
@@ -291,7 +277,7 @@ if [ "${RKE2_TYPE}" = 'server' ]; then
 
     if [ "${SERVER_TYPE}" = 'Standalone' ]; then
         info "::: Continue Installing RKE2 Server with Standalone..."
-        sleep 1
+        sleep ${RUNDELAY}
     elif [ "${SERVER_TYPE}" = 'Cluster' ]; then
         info "::: Configure Cluster config.yaml file..."
         cluster_config
@@ -306,16 +292,16 @@ fi
 
 double_line
 info "::: Done!!! - Enabling and Starting RKE2-Server service ... "
-sleep 1
+sleep ${RUNDELAY}
 
 # install helm
-# info "::: Install Helm..."
+info "::: Install Helm..."
 # snap install helm --classic
 
 # Setting up User Environment
 double_line
 info "::: Setting User ${RKE2_ADMIN} Environment..."
-sleep 1
+sleep ${RUNDELAY}
 # mkdir -p /home/${RKE2_ADMIN}/.kube
 # cp /etc/rancher/rke2/rke2.yaml /home/${RKE2_ADMIN}/.kube/config
 # chown -R ${RKE2_ADMIN}:${RKE2_ADMIN} /home/${RKE2_ADMIN}/.kube
@@ -328,4 +314,3 @@ double_line
 info "::: Finish ${RKE2_ADMIN} Environment..."
 info "::: Running the below command for testing!!!"
 info "::: source .bashrc && kubectl get nodes"
-sleep 1
