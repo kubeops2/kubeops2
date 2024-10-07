@@ -35,7 +35,7 @@ fatal() {
 
 # show usage of this tool
 usage() {
-    echo " 
+    echo "
     This is CURLED Script to Install RKE2 along with Ecosystem provided by OpsNow KubeOps Team.
     This Script is the First part and It is the script For only Installing RKE2 
     And Configuring ADMIN user's kubeconfig Environment.
@@ -114,11 +114,15 @@ install_yjq() {
     fi
 }
 
+# import all required variables for installation
+curlsource ${KUBEOPS_VERSIONS}
+
 # check RKE2 CONFIG DIR and File
 check_config_dir() {
     if [ ! -d $(dirname "${RKE2_CONFIG_YAML}") ]; then
         mkdir -p $(dirname "${RKE2_CONFIG_YAML}")
         touch "${RKE2_CONFIG_YAML}"
+    fi
 }
 
 # RKE2 server config
@@ -148,8 +152,8 @@ tls-san:
   - ${NODE1_IP}
   - ${NODE2_IP}
   - ${NODE3_IP}
-") > ${RKE2_CONFIG_YAML}
-
+")
+        echo "${RKE2_CONFIG}" > ${RKE2_CONFIG_YAML}
         gum spin --spinner dot --title "::: Generating RKE2 Another Master Nodes config.yaml ... " -- sleep 3
         gum write --header='Copy the below and Save it to Notes.' --value="server: https://${L4_IP}:9345
 token: ${RKE2_TOKEN}
@@ -185,8 +189,8 @@ agent_config() {
 }
 
 # check sudo permission
-if [ "$EUID" -ne 0 ]
-  then info "::: 이 스크립트는 sudo 권한으로 실행해야 합니다."
+if [ "$EUID" -ne 0 ]; then
+  info "::: 이 스크립트는 sudo 권한으로 실행해야 합니다."
   info "::: ex> $ curl -sSL url | sudo bash"
   exit -1
 fi
@@ -205,9 +209,6 @@ double_line
 
 # install GUM
 install_gum
-
-# import all required variables for installation
-curlsource ${KUBEOPS_VERSIONS}
 
 # Check variables
 # INSTALL_RKE2_VERSION 과 INSTALL_RKE2_TYPE 그리고 admin 계정을 체크한다.

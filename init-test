@@ -7,7 +7,22 @@ if [ "${DEBUG}" = 1 ]; then
 fi
 
 # variables
+INITENV='https://raw.githubusercontent.com/kubeops2/kubeops2/refs/heads/main/initenv'
 KUBEOPS_VERSIONS='https://raw.githubusercontent.com/kubeops2/kubeops2/refs/heads/main/versions'
+
+# loading environtal variables using curl
+curlsource() {
+    info "::: Loading Environtal Variables from KubeOps2 Github..."
+    sleep 1
+    f=$(mktemp -t curlsource.XXX)
+    curl -o "$f" -sSL "$1"
+    source "$f"
+    rm -f "$f"
+}
+
+# import all required variables for installation
+curlsource ${INITENV}
+curlsource ${KUBEOPS_VERSIONS}
 
 # double line
 double_line() {
@@ -35,57 +50,7 @@ fatal() {
 
 # show usage of this tool
 usage() {
-    echo " 
-    This is CURLED Script to Install RKE2 along with Ecosystem provided by OpsNow KubeOps Team.
-    This Script is the First part and It is the script For only Installing RKE2 
-    And Configuring ADMIN user's kubeconfig Environment.
-
-    Steps.
-        1. Install RKE2 and kubeconfig Env.
-            $ curl {URL/init} | sudo RKE2_RUN=true bash
-
-        2. Install Ecosystems on RKE2
-            $ curl {URL/tools} | TOOL_VAR=... TOOL_VAR2=... bash
-
-
-    ENV_VAR:
-        - RKE2_VERSION
-            Install RKE2 with this version.
-            * default : v1.30.5-rc3+rke2r1
-
-        - RKE2_TYPE
-            Install RKE2 with this mode.
-            * value : [server | agent]
-            * default : server
-
-        - RKE2_ADMIN
-            Install RKE2 and then Configure kubeconfig on this account.
-            This account should be exist already with sudo permission.
-            * default : kubeops
-
-        - RKE2_RUN
-            Install RKE2 if this value is 'true'.
-            default : falase
-
-
-    Usage: 
-            curl <this script URL> | sudo RKE2_RUN=true bash
-
-                OR
-
-            As Root, 
-            curl <this script URL> | RKE2_RUN=true bash
-"
-}
-
-# bash sourcing from curled file like github
-curlsource() {
-    info "::: Loading Environtal Variables from KubeOps2 Github..."
-    sleep 1
-    f=$(mktemp -t curlsource.XXX)
-    curl -o "$f" -sSL "$1"
-    source "$f"
-    rm -f "$f"
+    echo ${INIT_USAGE}
 }
 
 # install gum
@@ -119,6 +84,7 @@ check_config_dir() {
     if [ ! -d $(dirname "${RKE2_CONFIG_YAML}") ]; then
         mkdir -p $(dirname "${RKE2_CONFIG_YAML}")
         touch "${RKE2_CONFIG_YAML}"
+    fi
 }
 
 # RKE2 server config
@@ -127,11 +93,13 @@ cluster_config() {
     check_config_dir
     RKE2_TOKEN=$(cat ${RKE2_TOKEN_PATH})
     while :; do
-        L4_IP=$(gum input --header="::: Enter LoadBalancer IP Address - ")
-        NODE1_IP=$(gum input --header="::: Enter 1st Node IP Address - ")
-        NODE2_IP=$(gum input --header="::: Enter 2nd Node IP Address - ")
-        NODE3_IP=$(gum input --header="::: Enter 3rd Node IP Address - ")
+        double_line
+        L4_IP=$(gum input --header="::: Enter LoadBalancer IP Address - " --value=${GUM_CASE_L4_IP})
+        NODE1_IP=$(gum input --header="::: Enter 1st Node IP Address - " --value=${GUM_CASE_NODE_IP})
+        NODE2_IP=$(gum input --header="::: Enter 2nd Node IP Address - " --value=${GUM_CASE_NODE_IP})
+        NODE3_IP=$(gum input --header="::: Enter 3rd Node IP Address - " --value=${GUM_CASE_NODE1_IP})
 
+        double_line
         echo -e "# RKE2 Cluster Config\n- L4_IP : ${L4_IP}\n- NODE1_IP : ${NODE1_IP}\n- NODE2_IP : ${NODE2_IP}\n- NODE3_IP : ${NODE3_IP}  " | gum format
         if $(gum confirm "Everything is correct ?"); then
             break
@@ -140,33 +108,47 @@ cluster_config() {
         fi
     done
 
-    if $(gum confirm "First Master Server ?"); then
+    double_line
+    if $(gum confirm "First Master ?"); then
         gum spin --spinner dot --title "::: Generating RKE2 config.yaml ... " -- sleep 3
-        RKE2_CONFIG=$(gum write --header='Enter, If all configs are Correct.' --value="token: ${RKE2_TOKEN}
+        RKE2_CONFIG=$(gum write --header='Enter, If all things are Correct.' --value="token: ${RKE2_TOKEN}
 tls-san:
   - ${L4_IP}
   - ${NODE1_IP}
   - ${NODE2_IP}
   - ${NODE3_IP}
-") > ${RKE2_CONFIG_YAML}
+")
+        # Store the above result into config files.
+        echo "${RKE2_CONFIG}" > ${RKE2_CONFIG_YAML}
 
+        # Print out the generated config.yaml for Master nodes
         gum spin --spinner dot --title "::: Generating RKE2 Another Master Nodes config.yaml ... " -- sleep 3
-        gum write --header='Copy the below and Save it to Notes.' --value="server: https://${L4_IP}:9345
+        RKE2_CONFIG_SERVER=$(gum write --header="It's stored to ${RKE2_CONFIG_YAML_4SERVER}" --value="server: https://${L4_IP}:9345
 token: ${RKE2_TOKEN}
 tls-san:
   - ${L4_IP}
   - ${NODE1_IP}
   - ${NODE2_IP}
   - ${NODE3_IP}
-"
+")
+        # Store the above result into server config files.
+        echo "${RKE2_CONFIG_SERVER}" > ${RKE2_CONFIG_YAML_4SERVER}
+
+        # Print out the generated config.yaml for Worker nodes
         gum spin --spinner dot --title "::: Generating RKE2 Worker config.yaml ... " -- sleep 3
-        gum write --header='Copy the below and Save it to Notes.' --value="server: https://${L4_IP}:9345
+        RKE2_CONFIG_AGENT=$(gum write --header='Copy the below and Save it to Notes.' --value="server: https://${L4_IP}:9345
 token: ${RKE2_TOKEN}
-"
+")
+        # Store the above result into agent config files.
+        echo "${RKE2_CONFIG_SERVER}" > ${RKE2_CONFIG_YAML_4AGENT}
+
     else
         gum spin --spinner dot --title "::: Config RKE2 Additional Master Nodes ... " -- sleep 3
+        # loading server config.yaml file
+        RKE2_TMP_SERVER=$(cat ${RKE2_CONFIG_YAML_4SERVER})
         while :; do
-            RKE2_NODE_CONFIG=$(gum write --placeholder "Paste the configuration you copied before being shown on the screen.")
+            double_line
+            RKE2_NODE_CONFIG=$(gum write --placeholder "Paste the configuration you copied before..." --value=${RKE2_TMP_SERVER})
             gum confirm "Confirm ? " && break
             gum confirm "Wanna exit ?" && break
         done
@@ -177,8 +159,12 @@ token: ${RKE2_TOKEN}
 agent_config() {
     gum spin --spinner dot --title "::: Config RKE2 Worker Nodes ... " -- sleep 3
     check_config_dir
+    # loading server config.yaml file
+    RKE2_TMP_AGENT=$(cat ${RKE2_CONFIG_YAML_4AGENT})
+
     while :; do
-        RKE2_NODE_CONFIG=$(gum write --placeholder "Paste the configuration you copied before being shown on the screen.")
+        double_line
+        RKE2_NODE_CONFIG=$(gum write --placeholder "Paste the configuration you copied before..." --value=${RKE2_TMP_AGENT})
         gum confirm "Confirm ? " && break
         gum confirm "Wanna exit ?" && break
     done
@@ -205,9 +191,6 @@ double_line
 
 # install GUM
 install_gum
-
-# import all required variables for installation
-curlsource ${KUBEOPS_VERSIONS}
 
 # Check variables
 # INSTALL_RKE2_VERSION 과 INSTALL_RKE2_TYPE 그리고 admin 계정을 체크한다.

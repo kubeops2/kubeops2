@@ -1,0 +1,46 @@
+INIT_USAGE="""
+    This is CURLED Script to Install RKE2 along with Ecosystem provided by OpsNow KubeOps Team.
+    This Script is the First part and It is the script For only Installing RKE2 
+    And Configuring ADMIN user's kubeconfig Environment.
+
+    Steps.
+        1. Install RKE2 and kubeconfig Env.
+            $ curl {URL/init} | sudo RKE2_RUN=true bash
+
+        2. Install Ecosystems on RKE2
+            $ curl {URL/tools} | TOOL_VAR=... TOOL_VAR2=... bash
+
+
+    ENV_VAR:
+        - RKE2_VERSION
+            Install RKE2 with this version.
+            * default : v1.30.5-rc3+rke2r1
+
+        - RKE2_TYPE
+            Install RKE2 with this mode.
+            * value : [server | agent]
+            * default : server
+
+        - RKE2_ADMIN
+            Install RKE2 and then Configure kubeconfig on this account.
+            This account should be exist already with sudo permission.
+            * default : kubeops
+
+        - RKE2_RUN
+            Install RKE2 if this value is 'true'.
+            default : falase
+
+
+    Usage: 
+            curl <this script URL> | sudo RKE2_RUN=true bash
+
+                OR
+
+            As Root, 
+            curl <this script URL> | RKE2_RUN=true bash
+"""
+GUM_CASE_L4_IP='10.1.1.10'
+GUM_CASE_NODE_IP='10.1.1.5'
+export GUM_WRITE_HEIGHT=15
+export GUM_WRITE_HEADER_FOREGROUND=1
+export GUM_INPUT_HEADER_FOREGROUND=1
