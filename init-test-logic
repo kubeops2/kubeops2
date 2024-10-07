@@ -49,7 +49,7 @@ curlsource ${KUBEOPS_VERSIONS}
 
 # show usage of this tool
 usage() {
-    echo ${INIT_USAGE}
+    echo "${INIT_USAGE}"
 }
 
 # install gum
