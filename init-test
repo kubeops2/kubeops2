@@ -100,7 +100,7 @@ cluster_config() {
             NODE3_IP=$(gum input --header="::: Enter 3rd Node IP Address - " --value=${GUM_CASE_NODE_IP})
             
             double_line
-            gum write --header='Check the below and Enter' <<EOF > ${RKE2_CONFIG_YAML}
+            gum write --header='Check the below and Enter' --height=15 <<EOF > ${RKE2_CONFIG_YAML}
 token: ${RKE2_TOKEN}
 tls-san:
   - ${L4_IP}
@@ -141,7 +141,7 @@ EOF
         # loading server config.yaml file
         while :; do
             double_line
-            gum write --header="Check the belows and Enter..." < ${RKE2_CONFIG_YAML_4SERVER}
+            gum write --header="Check the belows and Enter..." --height=15 < ${RKE2_CONFIG_YAML_4SERVER}
             if $(gum confirm "Is Everything Correct ?"); then
                 double_line
                 info "::: ${RKE2_CONFIG_YAML_4SERVER} file is saved ..."
