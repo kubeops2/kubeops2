@@ -2,6 +2,7 @@
 
 set -e
 
+# conditional for DEBUG mode
 if [ "${DEBUG}" = 1 ]; then
     set -x
 fi
@@ -9,6 +10,22 @@ fi
 # variables
 INITENV='https://raw.githubusercontent.com/kubeops2/kubeops2/refs/heads/main/initenv'
 KUBEOPS_VERSIONS='https://raw.githubusercontent.com/kubeops2/kubeops2/refs/heads/main/versions'
+FUNCTIONS='https://raw.githubusercontent.com/kubeops2/kubeops2/refs/heads/main/functions'
+
+# loading environtal variables using curl
+curlsource() {
+    LOADING_FILE=$(basename $1)
+    echo "[INFO] ::: Loading Environtal Variables ${LOADING_FILE} from ..."
+    f=$(mktemp -t curlsource.XXX)
+    curl -o "$f" -sSL "$1"
+    source "$f"
+    rm -f "$f"
+}
+
+# import all required variables for installation
+curlsource ${INITENV}
+curlsource ${KUBEOPS_VERSIONS}
+# curlsource ${FUNCTIONS}
 
 # double line
 double_line() {
@@ -26,26 +43,9 @@ warn() {
 }
 
 # fatal logs the given argument at fatal log level.
-fatal() {
-    echo "[ERROR] " "$@" >&2
-    if [ -n "${SUFFIX}" ]; then
-        echo "[ALT] Please visit 'https://github.com/rancher/rke2/releases' directly and download the latest rke2.${SUFFIX}.tar.gz" >&2
-    fi
-    exit 1
+error() {
+    echo "[ERR] " "$@" >&2
 }
-
-# loading environtal variables using curl
-curlsource() {
-    info "::: Loading Environtal Variables from KubeOps2 Github..."
-    f=$(mktemp -t curlsource.XXX)
-    curl -o "$f" -sSL "$1"
-    source "$f"
-    rm -f "$f"
-}
-
-# import all required variables for installation
-curlsource ${INITENV}
-curlsource ${KUBEOPS_VERSIONS}
 
 # show usage of this tool
 usage() {
@@ -189,15 +189,11 @@ if [ -z "${RKE2_RUN}" ]; then # || [ "${RKE2_RUN}" = false ]; then
     exit -1
 fi
 
-# line breaker
-double_line
-
 # install GUM
 install_gum
 
 # Check variables
 # INSTALL_RKE2_VERSION 과 INSTALL_RKE2_TYPE 그리고 admin 계정을 체크한다.
-
 info "::: Start Setting RKE2 Configuration!!! :::"
 sleep ${RUNDELAY}
 double_line
@@ -221,52 +217,59 @@ else
 fi
 
 # /etc/security/limits.conf 파일 수정
-info "::: 시스템 전체의 파일 디스크립터 제한 설정 중..."
-if grep -q "nofile" /etc/security/limits.conf; then
-    sed -i '/nofile/d' /etc/security/limits.conf
+info "::: Applying nofile limitations in /etc/limits.conf ..."
+if [ "${DRYRUN}" != 1 ]; then
+    if grep -q "nofile" /etc/security/limits.conf; then
+        sed -i '/nofile/d' /etc/security/limits.conf
+    fi
+    echo "*       soft    nofile  65535" >> /etc/security/limits.conf
+    echo "*       hard    nofile  65535" >> /etc/security/limits.conf
 fi
-echo "*       soft    nofile  65535" >> /etc/security/limits.conf
-echo "*       hard    nofile  65535" >> /etc/security/limits.conf
 info "완료: /etc/security/limits.conf 파일이 수정되었습니다."
 
 # /etc/sysctl.conf 파일 수정
 info "::: Applying Kernel Parameters..."
-if grep -q "fs.inotify.max_user_watches" /etc/sysctl.conf; then
-    sed -i '/fs.inotify.max_user_watches/d' /etc/sysctl.conf
-fi
-if grep -q "fs.inotify.max_user_instances" /etc/sysctl.conf; then
-    sed -i '/fs.inotify.max_user_instances/d' /etc/sysctl.conf
-fi
+if [ "${DRYRUN}" != 1 ]; then
+    if grep -q "fs.inotify.max_user_watches" /etc/sysctl.conf; then
+        sed -i '/fs.inotify.max_user_watches/d' /etc/sysctl.conf
+    fi
+    if grep -q "fs.inotify.max_user_instances" /etc/sysctl.conf; then
+        sed -i '/fs.inotify.max_user_instances/d' /etc/sysctl.conf
+    fi
 
-echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf
-echo "fs.inotify.max_user_instances=512" >> /etc/sysctl.conf
-info "::: 완료: /etc/sysctl.conf 파일이 수정되었습니다."
-
-sysctl -p
+    echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf
+    echo "fs.inotify.max_user_instances=512" >> /etc/sysctl.conf
+    sysctl -p
+fi
+info "::: Finished: /etc/sysctl.conf is modified..."
 
 # swap off 처리
 # /etc/fstab 에 swap 라인 주석 처리 필요
 info "::: Deactivating Swap space..."
-sed -i 's/\/swap/#swap/g' /etc/fstab
-swapoff -a
+if [ "${DRYRUN}" != 1 ]; then
+    sed -i 's/\/swap/#swap/g' /etc/fstab
+    swapoff -a
 
-# Install Tools
-info "::: Install Iptables for CANAL CNI"
-apt update
-apt install iptables -y
-install_yjq
+    # Install Tools
+    info "::: Install IPtables for Canal CNI..."
+    apt update
+    apt install iptables -y
+    install_yjq
+fi
 
 # Install RKE2 As a server
 double_line
 info "::: Install RKE2 with ${RKE2_VERSION} and ${RKE2_TYPE} mode ..."
 sleep ${RUNDELAY}
 
-curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${RKE2_VERSION} INSTSLL_RKE2_TYPE=${RKE2_TYPE} sh -
+if [ "${DRYRUN}" != 1 ]; then
+    curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${RKE2_VERSION} INSTSLL_RKE2_TYPE=${RKE2_TYPE} sh -
 
-double_line
-info "::: Enabling and Starting RKE2-Server service ..."
-sleep ${RUNDELAY}
-systemctl enable rke2-server.service
+    double_line
+    info "::: Enabling RKE2-Server service ..."
+    sleep ${RUNDELAY}
+    systemctl enable rke2-server.service
+fi
 
 # Configure Cluster and Agent
 if [ "${RKE2_TYPE}" = 'server' ]; then
@@ -286,28 +289,36 @@ elif [ "${RKE2_TYPE}" = 'agent' ]; then
     agent_config
 fi
 
-systemctl start rke2-server.service
-# journalctl -u rke2-server -f
+# Start running rke2 service
+if [ "${DRYRUN}" != 1 ]; then
+    systemctl start rke2-server.service
+    # journalctl -u rke2-server -f
 
-double_line
-info "::: Done!!! - Enabling and Starting RKE2-Server service ... "
-sleep ${RUNDELAY}
+    double_line
+    info "::: Finish - Running RKE2-Server service ... "
+    sleep ${RUNDELAY}
+fi
 
 # install helm
 info "::: Install Helm..."
-snap install helm --classic
+if [ "${DRYRUN}" != 1 ]; then
+    snap install helm --classic
+fi
 
 # Setting up User Environment
 double_line
 info "::: Setting User ${RKE2_ADMIN} Environment..."
 sleep ${RUNDELAY}
-mkdir -p /home/${RKE2_ADMIN}/.kube
-cp /etc/rancher/rke2/rke2.yaml /home/${RKE2_ADMIN}/.kube/config
-chown -R ${RKE2_ADMIN}:${RKE2_ADMIN} /home/${RKE2_ADMIN}/.kube
-chmod 600 /home/${RKE2_ADMIN}/.kube/config
-echo "KUBECONFIG=/home/${RKE2_ADMIN}/.kube/config" >> /home/${RKE2_ADMIN}/.bashrc
-echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> /home/${RKE2_ADMIN}/.bashrc
-source /home/${RKE2_ADMIN}/.bashrc
+
+if [ "${DRYRUN}" != 1 ]; then
+    mkdir -p /home/${RKE2_ADMIN}/.kube
+    cp /etc/rancher/rke2/rke2.yaml /home/${RKE2_ADMIN}/.kube/config
+    chown -R ${RKE2_ADMIN}:${RKE2_ADMIN} /home/${RKE2_ADMIN}/.kube
+    chmod 600 /home/${RKE2_ADMIN}/.kube/config
+    echo "KUBECONFIG=/home/${RKE2_ADMIN}/.kube/config" >> /home/${RKE2_ADMIN}/.bashrc
+    echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> /home/${RKE2_ADMIN}/.bashrc
+    source /home/${RKE2_ADMIN}/.bashrc
+fi
 
 double_line
 info "::: Finish ${RKE2_ADMIN} Environment..."

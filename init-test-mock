@@ -189,9 +189,6 @@ if [ -z "${RKE2_RUN}" ]; then # || [ "${RKE2_RUN}" = false ]; then
     exit -1
 fi
 
-# line breaker
-double_line
-
 # install GUM
 install_gum
 
