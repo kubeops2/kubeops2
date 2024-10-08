@@ -145,3 +145,16 @@ agent_config() {
         fi        
     done
 }
+
+# Show title
+show_title() {
+    if [ "${DRYRUN}" = 1 ]; then
+        TITLE_MESSAGE="Dry-run mode Running..."
+    else
+        TITLE_MESSAGE="Initialize Installation of RKE2..."
+    fi
+    gum style \
+        --foreground 212 --border-foreground 212 --border double \
+        --align center --width 50 --margin "1 2" --padding "2 4" \
+        'KubeOps INIT' "${TITLE_MESSAGE}"
+}

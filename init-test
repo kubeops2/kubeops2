@@ -5,6 +5,8 @@ set -e
 # conditional for DEBUG mode
 if [ "${DEBUG}" = 1 ]; then
     set -x
+elif [ "${DRYRUN}" = 1 ]; then
+    RKE2_RUN=1
 fi
 
 # variables
@@ -45,6 +47,8 @@ fi
 
 # install GUM
 install_gum
+
+show_title
 
 # Check variables
 # INSTALL_RKE2_VERSION 과 INSTALL_RKE2_TYPE 그리고 admin 계정을 체크한다.
