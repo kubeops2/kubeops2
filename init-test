@@ -25,7 +25,7 @@ curlsource() {
 # import all required variables for installation
 curlsource ${INITENV}
 curlsource ${KUBEOPS_VERSIONS}
-# curlsource ${FUNCTIONS}
+curlsource ${FUNCTIONS}
 
 # double line
 double_line() {
