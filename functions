@@ -96,7 +96,7 @@ EOF
         double_line
         info "::: Generating ${RKE2_CONFIG_YAML_4SERVER} for Another Masters ... "
         # conditional for RKE2_CONFIG_DIR
-        if [ -d "${RKE2_CONFIG_DIR}" ]; then
+        if [ ! -d "${RKE2_CONFIG_DIR}" ]; then
             mkdir ${RKE2_CONFIG_DIR}
         fi
         cat <<EOF > ${RKE2_CONFIG_YAML_4SERVER}
