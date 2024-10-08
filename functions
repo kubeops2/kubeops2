@@ -199,11 +199,6 @@ copy_config_yaml() {
                     continue
                 fi
             done
-            if [ "${DRYRUN}" = 1 ]; then
-                info "::: Copy config.yaml to ${RKE2_NODE_SSH} in DRY-RUN mode ..."
-            else
-                
-            fi
         fi
     fi
 }
