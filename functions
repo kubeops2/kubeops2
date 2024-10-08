@@ -186,7 +186,7 @@ copy_config_yaml() {
                     else
                         sshpass -p ${NODE_PASSWD} scp -r ${RKE2_CONFIG_DIR} ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR}
                     fi
-                    if [ "$?" = 0]; then
+                    if [ "$?" = 0 ]; then
                         info "::: Successfully copy config.yaml to Remote..."
                     else
                         double_line
