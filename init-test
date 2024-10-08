@@ -48,6 +48,7 @@ fi
 # install GUM
 install_gum
 
+# show title along with the current mode
 show_title
 
 # Check variables
@@ -111,7 +112,7 @@ if [ "${DRYRUN}" != 1 ]; then
     # Install Tools
     info "::: Install IPtables for Canal CNI..."
     apt update
-    apt install iptables -y
+    apt install iptables sshpass -y
     install_yjq
 fi
 
@@ -182,3 +183,5 @@ double_line
 info "::: Finish ${RKE2_ADMIN} Environment..."
 info "::: Running the below command for testing!!!"
 info "::: source .bashrc && kubectl get nodes"
+
+copy_config_yaml

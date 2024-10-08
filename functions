@@ -65,6 +65,7 @@ cluster_config() {
     check_config_dir
     RKE2_TOKEN=$(cat ${RKE2_TOKEN_PATH})
     if $(gum confirm "First Master ?"); then
+        RKE2_FIRST=1
         while :; do
             double_line
             L4_IP=$(gum input --header="::: Enter LoadBalancer IP Address - " --value=${GUM_CASE_L4_IP})
@@ -94,6 +95,7 @@ EOF
         # Generating config.yaml for Master nodes
         double_line
         info "::: Generating ${RKE2_CONFIG_YAML_4SERVER} for Another Masters ... "
+        mkdir ${RKE2_CONFIG_DIR}
         cat <<EOF > ${RKE2_CONFIG_YAML_4SERVER}
 server: https://${L4_IP}:9345
 token: ${RKE2_TOKEN}
@@ -112,9 +114,10 @@ EOF
     else
         gum spin --spinner dot --title "::: Config RKE2 Additional Master Nodes ... " -- sleep ${RUNDELAY}
         # loading server config.yaml file
+        check_config_dir
         while :; do
             double_line
-            gum write --header="Check the belows and Enter..." --height=15 < ${RKE2_CONFIG_YAML_4SERVER}
+            gum write --header="Check the belows and Enter..." --height=15 < ${RKE2_CONFIG_YAML_4SERVER} > ${RKE2_CONFIG_YAML}
             if $(gum confirm "Is Everything Correct ?"); then
                 double_line
                 info "::: ${RKE2_CONFIG_YAML_4SERVER} file is saved ..."
@@ -134,7 +137,7 @@ agent_config() {
     # loading server config.yaml file
     while :; do
         double_line
-        gum write --header "Check the belows and Enter ..." < ${RKE2_CONFIG_YAML_4AGENT}
+        gum write --header "Check the belows and Enter ..." < ${RKE2_CONFIG_YAML_4AGENT} > ${RKE2_CONFIG_YAML}
         if $(gum confirm "Is Everything Correct ?"); then
             double_line
             info "::: ${RKE2_CONFIG_YAML_4AGENT} file is saved ..."
@@ -149,12 +152,58 @@ agent_config() {
 # Show title
 show_title() {
     if [ "${DRYRUN}" = 1 ]; then
-        TITLE_MESSAGE="Dry-run mode Running..."
+        TITLE_MESSAGE="Running Dry-run mode ..."
     else
-        TITLE_MESSAGE="Initialize Installation of RKE2..."
+        TITLE_MESSAGE="Initialize Installation of RKE2 ..."
     fi
     gum style \
         --foreground 212 --border-foreground 212 --border double \
         --align center --width 50 --margin "1 2" --padding "2 4" \
         'KubeOps INIT' "${TITLE_MESSAGE}"
+}
+
+# copy config.yaml to remote
+copy_config_yaml() {
+    if [ -e "${RKE2_CONFIG_YAML_4SERVER}" ] && [ -e "${RKE2_CONFIG_YAML_4AGENT}" ]; then
+        if $(gum confirm "Do you want config.yaml to copy the Remote ?"); then
+            info "Proceeding copy config.yaml to Remote ..."
+            while :; do
+                TARGET_CONFIG=$(gum file --height=20 ${RKE2_CONFIG_DIR})
+                case "${TARGET_CONFIG}" in
+                    ${RKE2_CONFIG_YAML_4SERVER})
+                        RKE2_NODE_SSH=$(gum choose --header="::: Choose Node IP - " ${NODE1_IP} ${NODE2_IP} ${NODE3_IP});;
+                    ${RKE2_CONFIG_YAML_4AGENT})
+                        RKE2_NODE_SSH=$(gum input --header="::: Enter Node IP - ");;
+                esac
+                NODE_PASSWD=$(gum input --password --char-limit=40)
+                if $(gum confirm "Proceeding copy config.yaml file..."); then
+                    if [ "${DRYRUN}" = 1 ]; then
+                        info "::: Copy config.yaml to ${RKE2_NODE_SSH} in DRY-RUN mode ..."
+                        echo "sshpass -p ${NODE_PASSWD} scp -r ${RKE2_CONFIG_DIR} ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR}"
+                    else
+                        sshpass -p ${NODE_PASSWD} scp -r ${RKE2_CONFIG_DIR} ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR}
+                    fi
+                    if [ "$?" = 0]; then
+                        info "::: Successfully copy config.yaml to Remote..."
+                    else
+                        double_line
+                        error "::: Failed to copy config.yaml to Remote..."
+                        error "::: Check ${RKE2_NODE_SSH} is alive or Password is Wrong!! "
+                        sleep ${RUNDELAY}
+                    fi
+                fi
+                if $(gum config "Wanna Quit ?"); then
+                    info "::: Cancel Copying config.yaml to Remote..."
+                    break
+                else
+                    continue
+                fi
+            done
+            if [ "${DRYRUN}" = 1 ]; then
+                info "::: Copy config.yaml to ${RKE2_NODE_SSH} in DRY-RUN mode ..."
+            else
+                
+            fi
+        fi
+    fi
 }

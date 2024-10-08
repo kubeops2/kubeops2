@@ -1,7 +1,8 @@
 RKE2_TOKEN_PATH=/var/lib/rancher/rke2/server/node-token
 RKE2_CONFIG_YAML=/etc/rancher/rke2/config.yaml
-RKE2_CONFIG_YAML_4SERVER=/tmp/master_config.yaml
-RKE2_CONFIG_YAML_4AGENT=/tmp/agent_config.yaml
+RKE2_CONFIG_DIR=/tmp/kubeops
+RKE2_CONFIG_YAML_4SERVER=${RKE2_CONFIG_DIR}/master_config.yaml
+RKE2_CONFIG_YAML_4AGENT=${RKE2_CONFIG_DIR}/agent_config.yaml
 RKE2_ALL_VERSIONS="v1.30.5+rke2r1 v1.31.1+rke2r1 v1.29.9+rke2r1"
 RKE2_ALL_TYPES="server agent"
 OS_GUM_VER=v0.14.5
