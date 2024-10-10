@@ -1,280 +1,149 @@
 #!/bin/bash
 
-set -e
+# set -e -o pipefail
 
+# conditional for DEBUG mode
 if [ "${DEBUG}" = 1 ]; then
     set -x
+elif [ "${DRYRUN}" = 1 ]; then
+    RKE2_RUN=1
 fi
 
 # variables
+INITENV='https://raw.githubusercontent.com/kubeops2/kubeops2/refs/heads/main/initenv'
 KUBEOPS_VERSIONS='https://raw.githubusercontent.com/kubeops2/kubeops2/refs/heads/main/versions'
+FUNCTIONS='https://raw.githubusercontent.com/kubeops2/kubeops2/refs/heads/main/functions'
 
-# double line
-double_line() {
-    echo;echo
-}
-
-# info logs the given argument at info log level.
-info() {
-    echo "[INFO] " "$@"
-}
-
-# warn logs the given argument at warn log level.
-warn() {
-    echo "[WARN] " "$@" >&2
-}
-
-# fatal logs the given argument at fatal log level.
-fatal() {
-    echo "[ERROR] " "$@" >&2
-    if [ -n "${SUFFIX}" ]; then
-        echo "[ALT] Please visit 'https://github.com/rancher/rke2/releases' directly and download the latest rke2.${SUFFIX}.tar.gz" >&2
-    fi
-    exit 1
-}
-
-# RKE2 agent config
-agent_config() {
-    double_line
-    info "::: Applying Agent Config..."
-}
-
-# RKE2 server config
-server_config() {
-    double_line
-    info "::: Applying Server config"
-}
-
-# check conditional function for RKE2 Variables
-# show_env() {
-#     if [ -n "${RKE2_ADMIN}" ]; then
-#         echo "${RKE2_ADMIN}"
-#     fi
-#     if [ -n "${RKE2_TYPE}" ]; then
-#         echo "${RKE2_TYPE}"
-#     fi
-#     if [ -n "${RKE2_VERSION}" ]; then
-#         echo "${RKE2_VERSION}"
-#     fi
-#     if [ -n "${RKE2_RUN}" ]; then
-#         echo "${RKE2_RUN}"
-#     fi
-# }
-
-# show usage of this tool
-usage() {
-    echo " 
-    This is CURLED Script to Install RKE2 along with Ecosystem provided by OpsNow KubeOps Team.
-    This Script is the First part and It is the script For only Installing RKE2 
-    And Configuring ADMIN user's kubeconfig Environment.
-
-    Steps.
-        1. Install RKE2 and kubeconfig Env.
-            $ curl {URL/init} | sudo RKE2_RUN=true bash
-
-        2. Install Ecosystems on RKE2
-            $ curl {URL/tools} | TOOL_VAR=... TOOL_VAR2=... bash
-
-
-    ENV_VAR:
-        - RKE2_VERSION
-            Install RKE2 with this version.
-            * default : v1.30.5-rc3+rke2r1
-
-        - RKE2_TYPE
-            Install RKE2 with this mode.
-            * value : [server | agent]
-            * default : server
-
-        - RKE2_ADMIN
-            Install RKE2 and then Configure kubeconfig on this account.
-            This account should be exist already with sudo permission.
-            * default : kubeops
-
-        - RKE2_RUN
-            Install RKE2 if this value is 'true'.
-            default : falase
-
-
-    Usage: 
-            curl <this script URL> | sudo RKE2_RUN=true bash
-
-                OR
-
-            As Root, 
-            curl <this script URL> | RKE2_RUN=true bash
-"
-}
-
-# bash sourcing from curled file like github
+# loading environtal variables using curl
 curlsource() {
-    info "::: Loading Environtal Variables from KubeOps2 Github..."
-    sleep 1
+    LOADING_FILE=$(basename $1)
+    echo "[INFO] ::: Loading Environtal Variables ${LOADING_FILE} from ..."
     f=$(mktemp -t curlsource.XXX)
     curl -o "$f" -sSL "$1"
     source "$f"
     rm -f "$f"
 }
 
-# install gum
-install_gum() {
-    info "::: Install Gum..."
-    if ! $(dpkg -s gum &> /dev/null); then
-        sudo mkdir -p /etc/apt/keyrings
-        curl -fsSL https://repo.charm.sh/apt/gpg.key | gpg --dearmor -o /etc/apt/keyrings/charm.gpg
-        echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | tee /etc/apt/sources.list.d/charm.list
-        apt update && apt install gum
-    fi
-    double_line
-    info "::: Finished installation of Gum ..."
-}
+# import all required variables for installation
+curlsource ${INITENV}
+curlsource ${KUBEOPS_VERSIONS}
+curlsource ${FUNCTIONS}
 
-# install yjq
-install_yjq() {
-    if ! $(which yq &> /dev/null); then
-        info "::: Install yq using snap ..."
-        snap install yq
-    fi
-
-    if ! $(which jq &> /dev/null); then
-        info "::: Install jq using snap ..."
-        snap install jq
-    fi
-}
-
-# 루트 권한 확인
-if [ "$EUID" -ne 0 ]
-  then info "::: 이 스크립트는 sudo 권한으로 실행해야 합니다."
+# check sudo permission
+if [ "$EUID" -ne 0 ]; then
+  info "::: This Script should be executed by root or users having SUDO ..."
   info "::: ex> $ curl -sSL url | sudo bash"
   exit -1
 fi
 
-info "::: sudo 권한 확인"
-sleep 1
-
-# Installation processs true or false
+# Installation Flag: true or false
 if [ -z "${RKE2_RUN}" ]; then # || [ "${RKE2_RUN}" = false ]; then
     usage
     exit -1
 fi
 
-# line breaker
-double_line
-
 # install GUM
 install_gum
 
-# import all required variables for installation
-curlsource ${KUBEOPS_VERSIONS}
-
-# Check variables
-# INSTALL_RKE2_VERSION 과 INSTALL_RKE2_TYPE 그리고 admin 계정을 체크한다.
-
-info "::: Start Setting RKE2 Configuration!!! :::"
-sleep 3
-double_line
-RKE2_VERSION=$(gum choose --header="::: Choose RKE2 Version - " ${RKE2_ALL_VERSIONS})
-info "::: RKE2_VERSION - ${RKE2_VERSION}"
-
-RKE2_TYPE=$(gum choose --header="::: Choose RKE2 Type - " ${RKE2_ALL_TYPES})
-info "::: RKE2_TYPE - ${RKE2_TYPE}"
-
-RKE2_ADMIN=$(gum input --value='kubeops' --header='::: RKE2 Admin Account - ')
-info "::: RKE2_ADMIN - ${RKE2_ADMIN}"
-
-double_line
-echo -e "# RKE2 Installation Config\n- RKE2_VERSION : ${RKE2_VERSION}\n- RKE2_TYPE : ${RKE2_TYPE}\n- RKE2_ADMIN : ${RKE2_ADMIN}  " | gum format
-
-if $(gum confirm); then
-    info "::: Proceeding Install Process RKE2 ..."
-else
-    info "::: Cancel Installation RKE2 ..."
-    exit -1
-fi
+# show title along with the current mode
+show_title
 
 # /etc/security/limits.conf 파일 수정
-info "::: 시스템 전체의 파일 디스크립터 제한 설정 중..."
-if grep -q "nofile" /etc/security/limits.conf; then
-    sed -i '/nofile/d' /etc/security/limits.conf
+info "::: Applying nofile limitations in /etc/limits.conf ..."
+if [ "${DRYRUN}" != 1 ]; then
+    if grep -q "nofile" /etc/security/limits.conf; then
+        sed -i '/nofile/d' /etc/security/limits.conf
+    fi
+    echo "*       soft    nofile  65535" >> /etc/security/limits.conf
+    echo "*       hard    nofile  65535" >> /etc/security/limits.conf
 fi
-echo "*       soft    nofile  65535" >> /etc/security/limits.conf
-echo "*       hard    nofile  65535" >> /etc/security/limits.conf
 info "완료: /etc/security/limits.conf 파일이 수정되었습니다."
 
 # /etc/sysctl.conf 파일 수정
 info "::: Applying Kernel Parameters..."
-if grep -q "fs.inotify.max_user_watches" /etc/sysctl.conf; then
-    sed -i '/fs.inotify.max_user_watches/d' /etc/sysctl.conf
-fi
-if grep -q "fs.inotify.max_user_instances" /etc/sysctl.conf; then
-    sed -i '/fs.inotify.max_user_instances/d' /etc/sysctl.conf
-fi
+if [ "${DRYRUN}" != 1 ]; then
+    if grep -q "fs.inotify.max_user_watches" /etc/sysctl.conf; then
+        sed -i '/fs.inotify.max_user_watches/d' /etc/sysctl.conf
+    fi
+    if grep -q "fs.inotify.max_user_instances" /etc/sysctl.conf; then
+        sed -i '/fs.inotify.max_user_instances/d' /etc/sysctl.conf
+    fi
 
-echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf
-echo "fs.inotify.max_user_instances=512" >> /etc/sysctl.conf
-info "::: 완료: /etc/sysctl.conf 파일이 수정되었습니다."
-
-sysctl -p
+    echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf
+    echo "fs.inotify.max_user_instances=512" >> /etc/sysctl.conf
+    sysctl -p
+fi
+info "::: Finished: /etc/sysctl.conf is modified..."
 
 # swap off 처리
 # /etc/fstab 에 swap 라인 주석 처리 필요
 info "::: Deactivating Swap space..."
-sed -i 's/\/swap/#swap/g' /etc/fstab
-swapoff -a
+if [ "${DRYRUN}" != 1 ]; then
+    sed -i 's/\/swap/#swap/g' /etc/fstab
+    swapoff -a
+fi
 
 # Install Tools
-info "::: Install Iptables for CANAL CNI"
+info "::: Install Tools for OS forming related to RKE2..."
 apt update
-apt install iptables -y
+apt install iptables sshpass -y
 install_yjq
 
-# Install RKE2 As a server
-double_line
-info "::: Install RKE2 with ${RKE2_VERSION} and ${RKE2_TYPE} mode ..."
-sleep 1
 
-curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${RKE2_VERSION} INSTSLL_RKE2_TYPE=${RKE2_TYPE} sh -
+# Configure RKE2 Installation
+config_rke2_install
 
-double_line
-info "::: Enabling and Starting RKE2-Server service ..."
-sleep 1
-systemctl enable rke2-server.service
+# Install RKE2 with configurations
+install_rke2
 
-
-# Configure Cluster
+# Configure Cluster and Agent
 if [ "${RKE2_TYPE}" = 'server' ]; then
+    double_line
     info "::: Configuring RKE2 Server config.yaml ..."
-    server_config
+    SERVER_TYPE=$(gum choose --header "Choose RKE2 Server Type: " "Standalone" "Cluster")
+
+    if [ "${SERVER_TYPE}" = 'Standalone' ]; then
+        info "::: Continue Installing RKE2 Server with Standalone..."
+        sleep ${RUNDELAY}
+    elif [ "${SERVER_TYPE}" = 'Cluster' ]; then
+        info "::: Configure Cluster config.yaml file..."
+        cluster_config
+    fi
 elif [ "${RKE2_TYPE}" = 'agent' ]; then
     info "::: Configuring RKE2 Agent config.yaml ..."
     agent_config
 fi
 
-systemctl start rke2-server.service
-# journalctl -u rke2-server -f
+# Start running rke2 service
+if [ "${DRYRUN}" != 1 ]; then
+    systemctl start rke2-server.service
+    # journalctl -u rke2-server -f
 
-double_line
-info "::: Done!!! - Enabling and Starting RKE2-Server service ... "
-sleep 1
+    double_line
+    info "::: Finish - Running RKE2-Server service ... "
+    sleep ${RUNDELAY}
+fi
 
 # install helm
 info "::: Install Helm..."
-snap install helm --classic
+if [ "${DRYRUN}" != 1 ]; then
+    snap install helm --classic
+fi
 
 # Setting up User Environment
 double_line
 info "::: Setting User ${RKE2_ADMIN} Environment..."
-sleep 1
-mkdir -p /home/${RKE2_ADMIN}/.kube
-cp /etc/rancher/rke2/rke2.yaml /home/${RKE2_ADMIN}/.kube/config
-chown -R ${RKE2_ADMIN}:${RKE2_ADMIN} /home/${RKE2_ADMIN}/.kube
-chmod 600 /home/${RKE2_ADMIN}/.kube/config
-echo "KUBECONFIG=/home/${RKE2_ADMIN}/.kube/config" >> /home/${RKE2_ADMIN}/.bashrc
-echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> /home/${RKE2_ADMIN}/.bashrc
-source /home/${RKE2_ADMIN}/.bashrc
+sleep ${RUNDELAY}
 
-double_line
-info "::: Finish ${RKE2_ADMIN} Environment..."
-info "::: Running the below command for testing!!!"
-info "::: source .bashrc && kubectl get nodes"
-sleep 1
+if [ "${DRYRUN}" != 1 ]; then
+    mkdir -p /home/${RKE2_ADMIN}/.kube
+    cp /etc/rancher/rke2/rke2.yaml /home/${RKE2_ADMIN}/.kube/config
+    chown -R ${RKE2_ADMIN}:${RKE2_ADMIN} /home/${RKE2_ADMIN}/.kube
+    chmod 600 /home/${RKE2_ADMIN}/.kube/config
+    echo "KUBECONFIG=/home/${RKE2_ADMIN}/.kube/config" >> /home/${RKE2_ADMIN}/.bashrc
+    echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> /home/${RKE2_ADMIN}/.bashrc
+    source /home/${RKE2_ADMIN}/.bashrc
+fi
+
+# Start the task of copying config.yaml to Remotes
+copy_config_yaml
