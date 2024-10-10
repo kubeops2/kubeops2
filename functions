@@ -175,7 +175,7 @@ copy_config_yaml() {
                 ${RKE2_CONFIG_YAML_4SERVER})
                     RKE2_NODE_SSH=$(gum choose --header="::: Choose Node IP - " ${NODE1_IP} ${NODE2_IP} ${NODE3_IP});;
                 ${RKE2_CONFIG_YAML_4AGENT})
-                    RKE2_NODE_SSH=$(gum input --header="::: Enter Node IP - ");;
+                    RKE2_NODE_SSH=$(gum input --header="::: Enter Node IP - " --value=${GUM_CASE_NODE_IP});;
             esac
             NODE_PASSWD=$(gum input --header='::: Enter Password - ' --password --char-limit=40)
             if $(gum confirm "Proceeding copy config.yaml file..."); then

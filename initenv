@@ -39,8 +39,8 @@ INIT_USAGE="""
             As Root, 
             curl <this script URL> | RKE2_RUN=true bash
 """
-GUM_CASE_L4_IP='10.1.1.10'
-GUM_CASE_NODE_IP='10.1.1.5'
+GUM_CASE_L4_IP='10.251.232.54'
+GUM_CASE_NODE_IP='10.251.232.'
 RUNDELAY=2
 export GUM_WRITE_HEIGHT=15
 export GUM_WRITE_HEADER_FOREGROUND=1
