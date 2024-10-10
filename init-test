@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+# set -e
 
 # conditional for DEBUG mode
 if [ "${DEBUG}" = 1 ]; then

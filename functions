@@ -69,7 +69,7 @@ cluster_config() {
         while :; do
             double_line
             L4_IP=$(gum input --header="::: Enter LoadBalancer IP Address - " --value=${GUM_CASE_L4_IP})
-            NODE1_IP=$(gum input --header="::: Enter 1st Node IP Address - " --value=${GUM_CASE_NODE_IP})
+            NODE1_IP=$(gum input --header="::: Enter This Node IP Address - " --value=${GUM_CASE_NODE_IP})
             NODE2_IP=$(gum input --header="::: Enter 2nd Node IP Address - " --value=${GUM_CASE_NODE_IP})
             NODE3_IP=$(gum input --header="::: Enter 3rd Node IP Address - " --value=${GUM_CASE_NODE_IP})
             
