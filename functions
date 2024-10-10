@@ -196,7 +196,7 @@ copy_config_yaml() {
                     fi
                 fi
                 if $(gum confirm "Wanna Quit ?"); then
-                    info "::: Cancel Copying config.yaml to Remote..."
+                    info "::: Finish Copy process of config.yaml to Remote..."
                     break
                 else
                     continue
