@@ -168,41 +168,33 @@ show_title() {
 # copy config.yaml to remote
 copy_config_yaml() {
     if [ -e "${RKE2_CONFIG_YAML_4SERVER}" ] && [ -e "${RKE2_CONFIG_YAML_4AGENT}" ]; then
-        if $(gum confirm "Do you want config.yaml to copy the Remote ?"); then
+        while $(gum confirm "Do you want config.yaml to copy the Remote ?"); do
             info "Proceeding copy config.yaml to Remote ..."
-            while :; do
-                TARGET_CONFIG=$(gum file --height=20 ${RKE2_CONFIG_DIR})
-                case "${TARGET_CONFIG}" in
-                    ${RKE2_CONFIG_YAML_4SERVER})
-                        RKE2_NODE_SSH=$(gum choose --header="::: Choose Node IP - " ${NODE1_IP} ${NODE2_IP} ${NODE3_IP});;
-                    ${RKE2_CONFIG_YAML_4AGENT})
-                        RKE2_NODE_SSH=$(gum input --header="::: Enter Node IP - ");;
-                esac
-                NODE_PASSWD=$(gum input --header='::: Enter Password - ' --password --char-limit=40)
-                if $(gum confirm "Proceeding copy config.yaml file..."); then
-                    if [ "${DRYRUN}" = 1 ]; then
-                        info "::: Copy config.yaml to ${RKE2_NODE_SSH} in DRY-RUN mode ..."
-                        echo "sshpass -p \"${NODE_PASSWD}\" scp -o StrictHostKeyChecking=no -r ${RKE2_CONFIG_DIR} ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR}"
-                    else
-                        sshpass -p "${NODE_PASSWD}" scp -o StrictHostKeyChecking=no -r ${RKE2_CONFIG_DIR} ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR}
-                    fi
-                    if [ "$?" = 0 ]; then
-                        info "::: Successfully copy config.yaml to Remote..."
-                    else
-                        double_line
-                        error "::: Failed to copy config.yaml to Remote..."
-                        error "::: Check ${RKE2_NODE_SSH} is alive or Password is Wrong!! "
-                        sleep ${RUNDELAY}
-                    fi
-                fi
-                if $(gum confirm "Wanna Quit ?"); then
-                    info "::: Finish Copy process of config.yaml to Remote..."
-                    break
+            TARGET_CONFIG=$(gum file --height=20 ${RKE2_CONFIG_DIR})
+            case "${TARGET_CONFIG}" in
+                ${RKE2_CONFIG_YAML_4SERVER})
+                    RKE2_NODE_SSH=$(gum choose --header="::: Choose Node IP - " ${NODE1_IP} ${NODE2_IP} ${NODE3_IP});;
+                ${RKE2_CONFIG_YAML_4AGENT})
+                    RKE2_NODE_SSH=$(gum input --header="::: Enter Node IP - ");;
+            esac
+            NODE_PASSWD=$(gum input --header='::: Enter Password - ' --password --char-limit=40)
+            if $(gum confirm "Proceeding copy config.yaml file..."); then
+                if [ "${DRYRUN}" = 1 ]; then
+                    info "::: Copy config.yaml to ${RKE2_NODE_SSH} in DRY-RUN mode ..."
+                    echo "sshpass -p \"${NODE_PASSWD}\" scp -o StrictHostKeyChecking=no -r ${RKE2_CONFIG_DIR} ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR}"
                 else
-                    continue
+                    sshpass -p "${NODE_PASSWD}" scp -o StrictHostKeyChecking=no -r ${RKE2_CONFIG_DIR} ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR}
                 fi
-            done
-        fi
+                if [ "$?" = 0 ]; then
+                    info "::: Successfully copy config.yaml to Remote..."
+                else
+                    double_line
+                    error "::: Failed to copy config.yaml to Remote..."
+                    error "::: Check ${RKE2_NODE_SSH} is alive or Password is Wrong!! "
+                    sleep ${RUNDELAY}
+                fi
+            fi
+        done
     fi
 }
 
