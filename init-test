@@ -130,9 +130,6 @@ if [ "${DRYRUN}" != 1 ]; then
     snap install helm --classic
 fi
 
-# Start the task of copying config.yaml to Remotes
-copy_config_yaml
-
 # Setting up User Environment
 double_line
 info "::: Setting User ${RKE2_ADMIN} Environment..."
@@ -148,8 +145,5 @@ if [ "${DRYRUN}" != 1 ]; then
     source /home/${RKE2_ADMIN}/.bashrc
 fi
 
-# Ending
-double_line
-info "::: Finish ${RKE2_ADMIN} Environment..."
-info "::: Running the below command for testing!!!"
-info "::: source .bashrc && kubectl get nodes"
+# Start the task of copying config.yaml to Remotes
+copy_config_yaml

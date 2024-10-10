@@ -195,6 +195,11 @@ copy_config_yaml() {
                 fi
             fi
         done
+        # Ending
+        double_line
+        info "::: Finish ${RKE2_ADMIN} Environment..."
+        info "::: Running the below command for testing!!!"
+        info "::: source .bashrc && kubectl get nodes"
     fi
 }
 
