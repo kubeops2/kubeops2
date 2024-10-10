@@ -81,13 +81,14 @@ info "::: Deactivating Swap space..."
 if [ "${DRYRUN}" != 1 ]; then
     sed -i 's/\/swap/#swap/g' /etc/fstab
     swapoff -a
-
-    # Install Tools
-    info "::: Install IPtables for Canal CNI..."
-    apt update
-    apt install iptables sshpass -y
-    install_yjq
 fi
+
+# Install Tools
+info "::: Install Tools for OS forming related to RKE2..."
+apt update
+apt install iptables sshpass -y
+install_yjq
+
 
 # Configure RKE2 Installation
 config_rke2_install
@@ -129,6 +130,9 @@ if [ "${DRYRUN}" != 1 ]; then
     snap install helm --classic
 fi
 
+# Start the task of copying config.yaml to Remotes
+copy_config_yaml
+
 # Setting up User Environment
 double_line
 info "::: Setting User ${RKE2_ADMIN} Environment..."
@@ -144,9 +148,8 @@ if [ "${DRYRUN}" != 1 ]; then
     source /home/${RKE2_ADMIN}/.bashrc
 fi
 
+# Ending
 double_line
 info "::: Finish ${RKE2_ADMIN} Environment..."
 info "::: Running the below command for testing!!!"
 info "::: source .bashrc && kubectl get nodes"
-
-copy_config_yaml
