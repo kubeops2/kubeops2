@@ -30,14 +30,11 @@ curlsource ${KUBEOPS_VERSIONS}
 curlsource ${FUNCTIONS}
 
 # check sudo permission
-if [ "$EUID" -ne 0 ]
-  then info "::: 이 스크립트는 sudo 권한으로 실행해야 합니다."
+if [ "$EUID" -ne 0 ]; then
+  info "::: This Script should be executed by root or users having SUDO ..."
   info "::: ex> $ curl -sSL url | sudo bash"
   exit -1
 fi
-
-info "::: sudo 권한 확인"
-sleep ${RUNDELAY}
 
 # Installation Flag: true or false
 if [ -z "${RKE2_RUN}" ]; then # || [ "${RKE2_RUN}" = false ]; then
@@ -50,30 +47,6 @@ install_gum
 
 # show title along with the current mode
 show_title
-
-# Check variables
-# INSTALL_RKE2_VERSION 과 INSTALL_RKE2_TYPE 그리고 admin 계정을 체크한다.
-info "::: Start Setting RKE2 Configuration!!! :::"
-sleep ${RUNDELAY}
-double_line
-RKE2_VERSION=$(gum choose --header="::: Choose RKE2 Version - " ${RKE2_ALL_VERSIONS})
-info "::: RKE2_VERSION - ${RKE2_VERSION}"
-
-RKE2_TYPE=$(gum choose --header="::: Choose RKE2 Type - " ${RKE2_ALL_TYPES})
-info "::: RKE2_TYPE - ${RKE2_TYPE}"
-
-RKE2_ADMIN=$(gum input --value='kubeops' --header='::: RKE2 Admin Account - ')
-info "::: RKE2_ADMIN - ${RKE2_ADMIN}"
-
-double_line
-echo -e "# RKE2 Installation Config\n- RKE2_VERSION : ${RKE2_VERSION}\n- RKE2_TYPE : ${RKE2_TYPE}\n- RKE2_ADMIN : ${RKE2_ADMIN}  " | gum format
-
-if $(gum confirm); then
-    info "::: Proceeding Install Process RKE2 ..."
-else
-    info "::: Cancel Installation RKE2 ..."
-    exit -1
-fi
 
 # /etc/security/limits.conf 파일 수정
 info "::: Applying nofile limitations in /etc/limits.conf ..."
@@ -116,19 +89,11 @@ if [ "${DRYRUN}" != 1 ]; then
     install_yjq
 fi
 
-# Install RKE2 As a server
-double_line
-info "::: Install RKE2 with ${RKE2_VERSION} and ${RKE2_TYPE} mode ..."
-sleep ${RUNDELAY}
+# Configure RKE2 Installation
+config_rke2_install
 
-if [ "${DRYRUN}" != 1 ]; then
-    curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${RKE2_VERSION} INSTSLL_RKE2_TYPE=${RKE2_TYPE} sh -
-
-    double_line
-    info "::: Enabling RKE2-Server service ..."
-    sleep ${RUNDELAY}
-    systemctl enable rke2-server.service
-fi
+# Install RKE2 with configurations
+install_rke2
 
 # Configure Cluster and Agent
 if [ "${RKE2_TYPE}" = 'server' ]; then

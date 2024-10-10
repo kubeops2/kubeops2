@@ -205,3 +205,49 @@ copy_config_yaml() {
         fi
     fi
 }
+
+# Check RKE2 Configurations
+config_rke2_install() {
+    info "::: Start Setting RKE2 Configuration!!! :::"
+    sleep ${RUNDELAY}
+    double_line
+    RKE2_VERSION=$(gum choose --header="::: Choose RKE2 Version - " ${RKE2_ALL_VERSIONS})
+    info "::: RKE2_VERSION - ${RKE2_VERSION}"
+
+    RKE2_TYPE=$(gum choose --header="::: Choose RKE2 Type - " ${RKE2_ALL_TYPES})
+    info "::: RKE2_TYPE - ${RKE2_TYPE}"
+
+    RKE2_ADMIN=$(gum input --value='kubeops' --header='::: RKE2 Admin Account - ')
+    info "::: RKE2_ADMIN - ${RKE2_ADMIN}"
+
+    double_line
+    echo -e "# RKE2 Installation Config\n- RKE2_VERSION : ${RKE2_VERSION}\n- RKE2_TYPE : ${RKE2_TYPE}\n- RKE2_ADMIN : ${RKE2_ADMIN}  " | gum format
+
+    if $(gum confirm); then
+        info "::: Proceeding Install Process RKE2 ..."
+    else
+        info "::: Cancel Installation RKE2 ..."
+        exit -1
+    fi
+
+    double_line
+    info "::: Install RKE2 with ${RKE2_VERSION} and ${RKE2_TYPE} mode ..."
+    sleep ${RUNDELAY}
+}
+
+# Install rke2 along with the given configurations
+install_rke2() {
+    if [ "${DRYRUN}" = 1 ]; then
+        echo "curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${RKE2_VERSION} INSTSLL_RKE2_TYPE=${RKE2_TYPE} sh -"
+        info "::: Enabling RKE2-Server service ..."
+    else
+        curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${RKE2_VERSION} INSTSLL_RKE2_TYPE=${RKE2_TYPE} sh -
+        double_line
+        info "::: Enabling RKE2-Server service ..."
+        sleep ${RUNDELAY}
+        systemctl enable rke2-server.service
+    fi
+}
+
+# terraforming function for OS and Versions such as 
+# ubuntu-22.04-LTS, ubuntu-24.04-LTS
