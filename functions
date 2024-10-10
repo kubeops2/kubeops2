@@ -178,11 +178,11 @@ copy_config_yaml() {
                     ${RKE2_CONFIG_YAML_4AGENT})
                         RKE2_NODE_SSH=$(gum input --header="::: Enter Node IP - ");;
                 esac
-                NODE_PASSWD=$(gum input --password --char-limit=40)
+                NODE_PASSWD=$(gum input --header='::: Enter Password - ' --password --char-limit=40)
                 if $(gum confirm "Proceeding copy config.yaml file..."); then
                     if [ "${DRYRUN}" = 1 ]; then
                         info "::: Copy config.yaml to ${RKE2_NODE_SSH} in DRY-RUN mode ..."
-                        echo "sshpass -p ${NODE_PASSWD} scp -r ${RKE2_CONFIG_DIR} ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR}"
+                        sshpass -p ${NODE_PASSWD} scp -r ${RKE2_CONFIG_DIR} ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR}
                     else
                         sshpass -p ${NODE_PASSWD} scp -o StrictHostKeyChecking=no -r ${RKE2_CONFIG_DIR} ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR}
                     fi
