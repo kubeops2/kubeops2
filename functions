@@ -184,7 +184,7 @@ copy_config_yaml() {
                         info "::: Copy config.yaml to ${RKE2_NODE_SSH} in DRY-RUN mode ..."
                         echo "sshpass -p ${NODE_PASSWD} scp -r ${RKE2_CONFIG_DIR} ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR}"
                     else
-                        sshpass -p ${NODE_PASSWD} scp -r ${RKE2_CONFIG_DIR} ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR}
+                        sshpass -p ${NODE_PASSWD} scp -o StrictHostKeyChecking=no -r ${RKE2_CONFIG_DIR} ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR}
                     fi
                     if [ "$?" = 0 ]; then
                         info "::: Successfully copy config.yaml to Remote..."
