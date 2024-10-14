@@ -143,6 +143,11 @@ if [ "${DRYRUN}" != 1 ]; then
     echo "KUBECONFIG=/home/${RKE2_ADMIN}/.kube/config" >> /home/${RKE2_ADMIN}/.bashrc
     echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> /home/${RKE2_ADMIN}/.bashrc
     source /home/${RKE2_ADMIN}/.bashrc
+    # Ending
+    double_line
+    info "::: Finish ${RKE2_ADMIN} Environment..."
+    info "::: Running the below command for testing!!!"
+    info "::: source .bashrc && kubectl get nodes"
 fi
 
 # Start the task of copying config.yaml to Remotes
