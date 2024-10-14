@@ -123,7 +123,7 @@ EOF
             gum write --header="Check the belows and Enter..." --height=15 < ${RKE2_CONFIG_YAML_4SERVER} > ${RKE2_CONFIG_YAML}
             if $(gum confirm "Is Everything Correct ?"); then
                 double_line
-                info "::: ${RKE2_CONFIG_YAML_4SERVER} file is saved ..."
+                info "::: ${RKE2_CONFIG_YAML} file is saved ..."
                 break
             else
                 info "::: Generating config.yaml Again ..."
