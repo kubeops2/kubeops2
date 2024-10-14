@@ -87,7 +87,7 @@ fi
 info "::: Install Tools for OS forming related to RKE2..."
 apt update
 apt install iptables sshpass -y
-install_yjq
+# install_yjq
 
 
 # Configure RKE2 Installation
