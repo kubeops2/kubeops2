@@ -63,7 +63,7 @@ check_config_dir() {
 cluster_config() {
     gum spin --spinner dot --title "::: Start Configuring RKE2 Cluster :::" -- sleep ${RUNDELAY}
     check_config_dir
-    RKE2_TOKEN=$(cat ${RKE2_TOKEN_PATH})
+    RKE2_TOKEN=$(cat /proc/sys/kernel/random/uuid)
     if $(gum confirm "First Master ?"); then
         RKE2_FIRST=1
         while :; do
