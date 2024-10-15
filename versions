@@ -13,3 +13,7 @@ OS_IPTABLES_VER=1.8.7-1ubuntu5.2
 OS_K9S=v1.1.1
 RKE2_LONGHORN=v2.1.1
 RKE2_ARGOCD=v2.1.2
+HELM_INSTALL='https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3'
+YQ_VER=v4.2.0
+YQ_BIN=yq_linux_amd64
+YQ_URL=https://github.com/mikefarah/yq/releases/download/${YQ_VER}/${YQ_BIN}

@@ -84,9 +84,9 @@ if [ "${DRYRUN}" != 1 ]; then
 fi
 
 # Install Tools
-info "::: Install Tools for OS forming related to RKE2..."
+info "::: Install iptables, sshpass, and git for OS forming related to RKE2..."
 apt update
-apt install iptables sshpass -y
+apt install iptables sshpass git -y
 install_yjq
 
 
@@ -125,10 +125,7 @@ if [ "${DRYRUN}" != 1 ]; then
 fi
 
 # install helm
-info "::: Install Helm..."
-if [ "${DRYRUN}" != 1 ]; then
-    snap install helm --classic
-fi
+install_helm
 
 # Setting up User Environment
 double_line
@@ -143,6 +140,7 @@ if [ "${DRYRUN}" != 1 ]; then
     echo "KUBECONFIG=/home/${RKE2_ADMIN}/.kube/config" >> /home/${RKE2_ADMIN}/.bashrc
     echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> /home/${RKE2_ADMIN}/.bashrc
     source /home/${RKE2_ADMIN}/.bashrc
+
     # Ending
     double_line
     info "::: Finish ${RKE2_ADMIN} Environment..."

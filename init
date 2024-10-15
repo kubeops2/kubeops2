@@ -84,10 +84,10 @@ if [ "${DRYRUN}" != 1 ]; then
 fi
 
 # Install Tools
-info "::: Install Tools for OS forming related to RKE2..."
+info "::: Install iptables, sshpass, and git for OS forming related to RKE2..."
 apt update
-apt install iptables sshpass -y
-# install_yjq
+apt install iptables sshpass git -y
+install_yjq
 
 
 # Configure RKE2 Installation
@@ -125,10 +125,7 @@ if [ "${DRYRUN}" != 1 ]; then
 fi
 
 # install helm
-info "::: Install Helm..."
-if [ "${DRYRUN}" != 1 ]; then
-    snap install helm --classic
-fi
+install_helm
 
 # Setting up User Environment
 double_line

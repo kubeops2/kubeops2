@@ -38,16 +38,25 @@ install_gum() {
     info "::: Finished installation of Gum ..."
 }
 
+# install helm
+install_helm() {
+    info "::: Install Helm ..."
+    if [ "${DRYRUN}" != 1 ]; then
+        curl ${HELM_INSTALL} | bash
+    fi
+    info "::: Finish installation Helm ..."
+}
+
 # install yjq
 install_yjq() {
     if ! $(which yq &> /dev/null); then
-        info "::: Install yq using snap ..."
-        snap install yq
+        info "::: Install yq ..."
+        wget ${YQ_URL} -O /usr/bin/yq && chmod +x /usr/bin/yq
     fi
 
     if ! $(which jq &> /dev/null); then
-        info "::: Install jq using snap ..."
-        snap install jq
+        info "::: Install jq ..."
+        apt install -y jq
     fi
 }
 
@@ -140,10 +149,21 @@ agent_config() {
     # loading server config.yaml file
     while :; do
         double_line
-        gum write --header "Check the belows and Enter ..." < ${RKE2_CONFIG_YAML_4AGENT} > ${RKE2_CONFIG_YAML}
-        if $(gum confirm "Is Everything Correct ?"); then
+        RKE2_NODE_SSH=$(gum input --header="::: Enter Master Node IP to fetch config file - " --value=${GUM_CASE_NODE_IP})
+        NODE_PASSWD=$(gum input --header="::: Enter ${RKE2_ADMIN} Account Password - " --password --char-limit=40)
+        if $(gum confirm "Are you sure ?"); then
             double_line
-            info "::: ${RKE2_CONFIG_YAML_4AGENT} file is saved ..."
+            info "::: Try fetching Agent's config.yaml from Master ${RKE2_NODE_SSH} ..."
+            sshpass -p "${NODE_PASSWD}" scp -o StrictHostKeyChecking=no -r ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR} ${RKE2_CONFIG_DIR}
+            if [ "$?" = 0 ]; then
+                info "::: Successfully fetching config.yaml from Remote..."
+            else
+                double_line
+                error "::: Failed to fetch Agent config.yaml from Master..."
+                sleep ${RUNDELAY}
+            fi
+            gum write --header "Check Fetched config.yaml, And Enter ..." < ${RKE2_CONFIG_YAML_4AGENT} > ${RKE2_CONFIG_YAML}
+            info "::: Successfully Populate config.yaml file ..."
             break
         else
             info "::: Generating config.yaml Again ..."
