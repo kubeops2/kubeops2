@@ -147,7 +147,7 @@ agent_config() {
     gum spin --spinner dot --title "::: Config RKE2 Worker Node ... " -- sleep ${RUNDELAY}
     check_config_dir
     # loading server config.yaml file
-    while $(gum confirm "Do you want to bring config.yaml from the Remote ?"); do
+    while $(gum confirm "Do you want to fetch config.yaml from the Remote ?"); do
         double_line
         RKE2_NODE_SSH=$(gum input --header="::: Enter Master Node IP to fetch config file - " --value=${GUM_CASE_NODE_IP})
         NODE_PASSWD=$(gum input --header="::: Enter ${RKE2_ADMIN} Account Password - " --password --char-limit=40)
