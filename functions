@@ -155,7 +155,7 @@ agent_config() {
         double_line
         RKE2_NODE_SSH=$(gum input --header="::: Enter Master Node IP to fetch config file - " --value=${GUM_CASE_NODE_IP})
         NODE_PASSWD=$(gum input --header="::: Enter ${RKE2_ADMIN} Account Password - " --password --value='' --char-limit=40)
-        if [ -e "${RKE2_NODE_SSH}" ] && [ -e "${NODE_PASSWD}" ]; then
+        if [ ! -z "${RKE2_NODE_SSH}" ] && [ ! -z "${NODE_PASSWD}" ]; then
             double_line
             info "::: Try fetching Agent's config.yaml from Master ${RKE2_NODE_SSH} ..."
             sshpass -p "${NODE_PASSWD}" scp -o StrictHostKeyChecking=no -r ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR} ${RKE2_CONFIG_DIR}
