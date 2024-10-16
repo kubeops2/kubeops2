@@ -70,6 +70,7 @@ check_config_dir() {
 
 # RKE2 server config
 cluster_config() {
+    set +e
     gum spin --spinner dot --title "::: Start Configuring RKE2 Cluster :::" -- sleep ${RUNDELAY}
     check_config_dir
     RKE2_TOKEN=$(cat /proc/sys/kernel/random/uuid)
@@ -146,14 +147,15 @@ EOF
 
 # RKE2 agent config
 agent_config() {
+    set +e
     gum spin --spinner dot --title "::: Config RKE2 Worker Node ... " -- sleep ${RUNDELAY}
     check_config_dir
     # loading server config.yaml file
-    while $(gum confirm "Do you want to fetch config.yaml from the Remote ?"); do
+    while :; do
         double_line
         RKE2_NODE_SSH=$(gum input --header="::: Enter Master Node IP to fetch config file - " --value=${GUM_CASE_NODE_IP})
-        NODE_PASSWD=$(gum input --header="::: Enter ${RKE2_ADMIN} Account Password - " --password --char-limit=40)
-        if $(gum confirm "Are you sure ?"); then
+        NODE_PASSWD=$(gum input --header="::: Enter ${RKE2_ADMIN} Account Password - " --password --value='' --char-limit=40)
+        if [ -e "${RKE2_NODE_SSH}" ] && [ -e "${NODE_PASSWD}" ]; then
             double_line
             info "::: Try fetching Agent's config.yaml from Master ${RKE2_NODE_SSH} ..."
             sshpass -p "${NODE_PASSWD}" scp -o StrictHostKeyChecking=no -r ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR} ${RKE2_CONFIG_DIR}
@@ -166,13 +168,12 @@ agent_config() {
             fi
             gum write --header "Check Fetched config.yaml, And Enter ..." < ${RKE2_CONFIG_YAML_4AGENT} > ${RKE2_CONFIG_YAML}
             info "::: Successfully Populate config.yaml file ..."
+            break
         else
-            info "::: Generating config.yaml Again ..."
-            continue
+            error "::: There's no infomation you entered. ..."
+            error "::: Generating config.yaml Again ..."
         fi        
     done
-
-    return 0
 }
 
 # Show title
