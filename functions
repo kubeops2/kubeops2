@@ -140,6 +140,8 @@ EOF
             fi
         done
     fi
+
+    return 0
 }
 
 # RKE2 agent config
@@ -169,6 +171,8 @@ agent_config() {
             continue
         fi        
     done
+
+    return 0
 }
 
 # Show title
@@ -215,6 +219,8 @@ copy_config_yaml() {
             fi
         done
     fi
+
+    return 0
 }
 
 # Check RKE2 Configurations
