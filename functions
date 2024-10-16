@@ -164,7 +164,7 @@ agent_config() {
             error "::: Failed to fetch Agent config.yaml from Master..."
             sleep ${RUNDELAY}
         fi
-        # gum write --header "Check Fetched config.yaml, And Enter ..." < ${RKE2_CONFIG_YAML_4AGENT} > ${RKE2_CONFIG_YAML}
+        gum write --header "Check Fetched config.yaml, And Enter ..." < ${RKE2_CONFIG_YAML_4AGENT} > ${RKE2_CONFIG_YAML}
         info "::: Successfully Populate config.yaml file ..."
     else
         error "::: There's no infomation you entered. ..."
