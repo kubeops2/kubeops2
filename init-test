@@ -116,6 +116,7 @@ fi
 
 # Start running rke2 service
 if [ "${DRYRUN}" != 1 ]; then
+    info "::: Start - Running RKE2-Server service ..."
     systemctl start rke2-server.service
     # journalctl -u rke2-server -f
 
