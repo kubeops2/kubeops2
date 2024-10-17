@@ -140,6 +140,7 @@ if [ "${DRYRUN}" != 1 ]; then
     chmod 600 /home/${RKE2_ADMIN}/.kube/config
     echo "KUBECONFIG=/home/${RKE2_ADMIN}/.kube/config" >> /home/${RKE2_ADMIN}/.bashrc
     echo "PATH=$PATH:/var/lib/rancher/rke2/bin" >> /home/${RKE2_ADMIN}/.bashrc
+    echo "source <(kubectl completion bash)" >> ~/.bashrc    
     source /home/${RKE2_ADMIN}/.bashrc
 
     # Ending
