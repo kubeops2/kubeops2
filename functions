@@ -147,30 +147,32 @@ EOF
 agent_config() {
     set +e
     gum spin --spinner dot --title "::: Config RKE2 Worker Node ... " -- sleep ${RUNDELAY}
-    check_config_dir
+    check_config_dir # check config.yaml folder
+    IS_LOOPING=0
     # loading server config.yaml file
-    # while :; do
-    double_line
-    RKE2_NODE_SSH=$(gum input --header="::: Enter Master Node IP to fetch config file - " --value=${GUM_CASE_NODE_IP})
-    NODE_PASSWD=$(gum input --header="::: Enter ${RKE2_ADMIN} Account Password - " --password --value='Password' --char-limit=40)
-    if [ ! -z "${RKE2_NODE_SSH}" ] && [ ! -z "${NODE_PASSWD}" ]; then
-        double_line
-        info "::: Try fetching Agent's config.yaml from Master ${RKE2_NODE_SSH} ..."
-        sshpass -p "${NODE_PASSWD}" scp -o StrictHostKeyChecking=no -r ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR} ${RKE2_CONFIG_DIR}
-        if [ "$?" = 0 ]; then
-            info "::: Successfully fetching config.yaml from Remote..."
-        else
+    while [ ${IS_LOOPING} -eq 0 ]; do
+        RKE2_NODE_SSH=$(gum input --header="::: Enter Master Node IP to fetch config file - " --value=${GUM_CASE_NODE_IP})
+        NODE_PASSWD=$(gum input --header="::: Enter ${RKE2_ADMIN} Account Password - " --password --value='pass' --char-limit=40)
+        if [ ! -z "${RKE2_NODE_SSH}" ] && [ ! -z "${NODE_PASSWD}" ]; then
             double_line
-            error "::: Failed to fetch Agent config.yaml from Master..."
-            sleep ${RUNDELAY}
+            info "::: Try fetching Agent's config.yaml from Master ${RKE2_NODE_SSH} ..."
+            sshpass -p "${NODE_PASSWD}" scp -o StrictHostKeyChecking=no -r ${RKE2_ADMIN}@${RKE2_NODE_SSH}:${RKE2_CONFIG_DIR} ${RKE2_CONFIG_DIR}
+            if [ "$?" = 0 ]; then
+                info "::: Successfully fetching config.yaml from Remote..."
+                sleep ${RUNDELAY}
+                gum write --header "Check Fetched config.yaml, And Enter ..." < ${RKE2_CONFIG_YAML_4AGENT} > ${RKE2_CONFIG_YAML}
+                info "::: Successfully Populate config.yaml file ..."
+                IS_LOOPING=1
+            else
+                double_line
+                error "::: Failed to fetch Agent config.yaml from Master..."
+                sleep ${RUNDELAY}
+            fi
+        else
+            error "::: There's no infomation you entered. ..."
+            error "::: Generating config.yaml Again ..."
         fi
-        gum write --header "Check Fetched config.yaml, And Enter ..." < ${RKE2_CONFIG_YAML_4AGENT} > ${RKE2_CONFIG_YAML}
-        info "::: Successfully Populate config.yaml file ..."
-    else
-        error "::: There's no infomation you entered. ..."
-        # error "::: Generating config.yaml Again ..."
-    fi        
-    # done
+    done
 }
 
 # Show title
