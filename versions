@@ -12,6 +12,7 @@ OS_HELM_VER=v3.16.1
 OS_IPTABLES_VER=1.8.7-1ubuntu5.2
 OS_K9S=v1.1.1
 RKE2_LONGHORN=1.7.1
+RKE2_LONGHORN_URL='https://charts.longhorn.io'
 RKE2_ARGOCD=v2.1.2
 HELM_INSTALL='https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3'
 YQ_VER=v4.2.0

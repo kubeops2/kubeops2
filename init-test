@@ -86,7 +86,7 @@ fi
 # Install Tools
 info "::: Install iptables, sshpass, and git for OS forming related to RKE2..."
 apt update
-apt install iptables sshpass git -y
+apt install iptables sshpass git open-iscsi nfs-common -y
 install_yjq
 
 
